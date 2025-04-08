@@ -1,3 +1,4 @@
+import 'package:engaz_app/features/auth/login/viewmodel/login_viewmodel.dart';
 import 'package:engaz_app/features/splash/viewmodel/splash_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,8 @@ void main() {
       MultiProvider(
           providers: [
             ChangeNotifierProvider(create: (_) => SplashViewModel()),
+            ChangeNotifierProvider(create: (_) => LoginViewModel()),
+
           ],
       child : MyApp()
   ));
