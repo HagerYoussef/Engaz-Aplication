@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../printing_request/view/printer_request_page.dart';
+import '../../translation _request/view/translation_request_page.dart';
 
 class ContentViewModel extends ChangeNotifier {
   final PageController pageController = PageController();
@@ -14,13 +16,13 @@ class ContentViewModel extends ChangeNotifier {
       'title': 'الترجمة',
       'description': 'نقدم أفضل خدمات الترجمة لأكثر من 10 لغات حول العالم',
       'image': 'assets/images/img5.png',
-      //'page': const TranslationRequestPage(),
+      'page': TranslationRequestPage(),
     },
     {
       'title': 'الطباعة',
       'description': 'نقدم أفضل جودة للطباعة بأسعار تنافسية',
       'image': 'assets/images/img6.png',
-      //'page': const PrinterRequestPage(),
+      'page': PrinterRequestPage(),
     },
   ];
 

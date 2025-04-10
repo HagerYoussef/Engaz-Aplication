@@ -4,13 +4,13 @@ class CategoryCard extends StatelessWidget {
   final String title;
   final String description;
   final String image;
-  //final Widget destinationPage;
+  final Widget destinationPage;
 
-  const CategoryCard({
+  const CategoryCard({super.key,
     required this.title,
     required this.description,
     required this.image,
-    //required this.destinationPage,
+    required this.destinationPage,
   });
 
   @override
@@ -51,12 +51,12 @@ class CategoryCard extends StatelessWidget {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => destinationPage,
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => destinationPage,
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,

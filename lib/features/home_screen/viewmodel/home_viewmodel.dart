@@ -5,9 +5,9 @@ class HomeViewModel extends ChangeNotifier {
   int selectedIndex = 0;
 
   final List<Widget> pages = [
-    HomeContent(),
-    Placeholder(fallbackHeight: 200), // OrdersScreen(),
-    Placeholder(fallbackHeight: 200), // SettingsScreen(),
+    const HomeContent(),
+    const Placeholder(fallbackHeight: 200), // OrdersScreen(),
+    const Placeholder(fallbackHeight: 200), // SettingsScreen(),
   ];
 
   void changeTab(int index) {

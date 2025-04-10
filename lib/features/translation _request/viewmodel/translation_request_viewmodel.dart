@@ -1,24 +1,27 @@
-import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 
 class TranslationRequestViewModel extends ChangeNotifier {
   final List<String> availableLanguages = [
     'إنجليزي(5 دينار /100 كلمة)',
-    'فرنسي(5 دينار /100 كلمة)',
+    'فرنسي(5 دينار /100 كلمة) ',
     'اسباني(5 دينار /100 كلمة)',
     'الماني(5 دينار /100 كلمة)',
     'ايطالي(5 دينار /100 كلمة)',
-    'صيني(5 دينار /100 كلمة)',
+    'صيني(5 دينار /100 كلمة)'
   ];
 
   final List<PlatformFile> selectedFiles = [];
   final List<String> selectedLanguages = [];
 
   String? selectedLanguage;
-  String deliveryOption = ''; // استخدمها لاحقًا إذا عندك اختيارات توصيل
+  String deliveryOption = '';
   List<String> selectedTargetLanguages = [];
   String notes = '';
+
+  // إضافة controller للملاحظات
+  TextEditingController notesController = TextEditingController();
 
   void setNotes(String value) {
     notes = value;
@@ -37,7 +40,6 @@ class TranslationRequestViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // تحديث اللغة الأساسية
   void selectLanguage(String? language) {
     if (language != null) {
       selectedLanguage = language;
@@ -47,7 +49,6 @@ class TranslationRequestViewModel extends ChangeNotifier {
     }
   }
 
-  // إضافة لغة من قائمة الترجمة
   void addLanguage(String language) {
     if (!selectedLanguages.contains(language)) {
       selectedLanguages.add(language);
@@ -55,19 +56,16 @@ class TranslationRequestViewModel extends ChangeNotifier {
     }
   }
 
-  // حذف لغة
   void removeLanguage(String language) {
     selectedLanguages.remove(language);
     notifyListeners();
   }
 
-  // إضافة ملاحظات
   void updateNotes(String value) {
     notes = value;
     notifyListeners();
   }
 
-  // إضافة ملف
   Future<void> pickFile() async {
     try {
       final result = await FilePicker.platform.pickFiles();
@@ -80,13 +78,11 @@ class TranslationRequestViewModel extends ChangeNotifier {
     }
   }
 
-  // إزالة ملف
   void removeFile(PlatformFile file) {
     selectedFiles.remove(file);
     notifyListeners();
   }
 
-  // تحديد الأيقونة المناسبة حسب الامتداد
   String getFileIconPath(String extension) {
     switch (extension.toLowerCase()) {
       case 'pdf':
@@ -102,12 +98,10 @@ class TranslationRequestViewModel extends ChangeNotifier {
     }
   }
 
-  void openFile(String path) {
+  void openFile(String? path) {
     OpenFile.open(path);
   }
 
-
-  // صلاحية الإرسال
   bool canSubmit() {
     return selectedLanguage != null &&
         selectedLanguages.isNotEmpty &&
@@ -120,5 +114,4 @@ class TranslationRequestViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 }

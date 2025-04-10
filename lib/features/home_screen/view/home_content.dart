@@ -109,7 +109,7 @@ class HomeContent extends StatelessWidget {
                           title: cat['title'],
                           description: cat['description'],
                           image: cat['image'],
-                          //destinationPage: cat['page'],
+                          destinationPage: cat['page'],
                         )),
                       ],
                     ),
