@@ -1,0 +1,2 @@
+D:/Job/Engaz-Aplication/android/app/.cxx/Debug/t3g1v5dt/x86_64/CMakeFiles/edit_cache.dir
+D:/Job/Engaz-Aplication/android/app/.cxx/Debug/t3g1v5dt/x86_64/CMakeFiles/rebuild_cache.dir
