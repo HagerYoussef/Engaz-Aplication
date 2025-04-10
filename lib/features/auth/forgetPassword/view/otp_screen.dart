@@ -2,6 +2,7 @@ import 'package:engaz_app/features/auth/forgetPassword/widgets/otp_field.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../home_screen/view/home_view.dart';
 import '../viewmodel/otp_viewmodel.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -90,14 +91,14 @@ class _OtpScreenState extends State<OtpScreen> {
                               height: buttonHeight,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //       builder: (context) => const HomePage()),
-                                  // );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomePage()),
+                                  );
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color.fromRGBO(64, 157, 220, 1),
+                                  backgroundColor: const Color.fromRGBO(64, 157, 220, 1),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
