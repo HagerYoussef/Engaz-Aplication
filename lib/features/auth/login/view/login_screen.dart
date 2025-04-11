@@ -84,29 +84,43 @@ class LoginScreen extends StatelessWidget {
                               width: double.infinity,
                               height: buttonHeight,
                               child: ElevatedButton(
-                                onPressed: () {
-                                  if (!formKey.currentState!.validate()) {
-                                    return;
-                                  }
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => OtpScreen(
-                                        contactInfo: viewModel.userInput,
-                                        contactType: viewModel.isPhoneSelected
-                                            ? 'phone'
-                                            : 'email',
+                                onPressed: viewModel.loginState == LoginState.loading
+                                    ? () {}
+                                    : () async {
+                                  if (!formKey.currentState!.validate()) return;
+
+                                  final result = await viewModel.loginUser();
+
+                                  if (result['success']) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OtpScreen(
+                                          contactInfo: viewModel.userInput,
+                                          contactType: viewModel.isPhoneSelected ? 'phone' : 'email',
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(result['message']),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color.fromRGBO(64, 157, 220, 1),
+                                  backgroundColor: viewModel.loginState == LoginState.loading
+                                      ? Colors.blue.withOpacity(0.7)
+                                      : Colors.blue,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text(
+                                child: viewModel.loginState == LoginState.loading
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : const Text(
                                   "تسجيل الدخول",
                                   style: TextStyle(
                                     fontSize: 15,
@@ -119,6 +133,7 @@ class LoginScreen extends StatelessWidget {
                             );
                           },
                         ),
+
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
