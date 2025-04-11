@@ -115,44 +115,61 @@ class RegisterScreen extends StatelessWidget {
                               .setEmail(value),
                         ),
                         const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          height: buttonHeight,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (!formKey.currentState!.validate()) {
-                                return;
-                              }
-                              final viewModel = Provider.of<LoginViewModel>(
-                                  context,
-                                  listen: false);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => OtpScreen2(
-                                    phone: viewModel.phone,
-                                    email: viewModel.email,
+                        Consumer<LoginViewModel>(
+                          builder: (context, viewModel, _) {
+                            return SizedBox(
+                              width: double.infinity,
+                              height: buttonHeight,
+                              child: ElevatedButton(
+                                onPressed: viewModel.registerState == RegisterState.loading
+                                    ? (){}
+                                    : () async {
+                                  if (!formKey.currentState!.validate()) return;
+
+                                  final result = await viewModel.registerUser(context);
+
+                                  if (result['success']) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OtpScreen2(
+                                          phone: viewModel.phone,
+                                          email: viewModel.email,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(result['message']),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromRGBO(64, 157, 220, 1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color.fromRGBO(64, 157, 220, 1),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                child: viewModel.registerState == RegisterState.loading
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : const Text(
+                                  "تسجيل",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'IBM_Plex_Sans_Arabic',
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: const Text(
-                              "تسجيل",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'IBM_Plex_Sans_Arabic',
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
+
+
                         const SizedBox(height: 12),
                         Text.rich(TextSpan(
                           text: "لديك حساب بالفعل؟ ",

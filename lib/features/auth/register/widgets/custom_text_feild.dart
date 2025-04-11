@@ -37,11 +37,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
       return Theme(
         data: Theme.of(context).copyWith(
           textSelectionTheme: const TextSelectionThemeData(
-            cursorColor: Color.fromRGBO(64, 157, 220, 1), // لون المؤشر
+            cursorColor: Color.fromRGBO(64, 157, 220, 1),
             selectionColor:
-            Color.fromRGBO(64, 157, 220, 1), // لون التحديد
+            Color.fromRGBO(64, 157, 220, 1),
             selectionHandleColor: Color.fromRGBO(
-                64, 157, 220, 1), // لون "اليد" أو مقبض التحديد
+                64, 157, 220, 1),
           ),
         ),
         child: TextFormField(
@@ -49,9 +49,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
           cursorColor: Color.fromRGBO(64, 157, 220, 1),
           textInputAction: TextInputAction.next,
           onChanged: (value) {
-            viewModel.setUserInput(value); // تحديث عام للعرض
+            viewModel.setUserInput(value);
             if (widget.onChanged != null) {
-              widget.onChanged!(value); // تخصيص التغيير للحقل المناسب
+              widget.onChanged!(value);
             }
           },
           validator: (value) {

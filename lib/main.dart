@@ -3,6 +3,7 @@ import 'package:engaz_app/features/splash/viewmodel/splash_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/routing/app_routes.dart';
+import 'features/auth/forgetPassword/view/otp_screen.dart';
 
 void main() {
   runApp(
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
+
       routes: AppRoutes.routes,
     );
   }
