@@ -1,6 +1,8 @@
 import 'package:engaz_app/features/auth/forgetPassword/view/otp_screen.dart';
 import 'package:engaz_app/features/auth/login/widgets/login_text_feild.dart';
 import 'package:engaz_app/features/auth/register/view/register_screen.dart';
+import 'package:engaz_app/features/home_screen/view/home_view.dart';
+import 'package:engaz_app/features/visitor/home_screen_2.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -139,7 +141,9 @@ class LoginScreen extends StatelessWidget {
                           width: double.infinity,
                           height: buttonHeight,
                           child: OutlinedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage2()));
+                            },
                             style: OutlinedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
