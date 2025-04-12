@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../register/model/register_model.dart';
 import '../../register/services/register_services.dart';
 import '../services/login_services.dart';
@@ -30,6 +30,11 @@ class LoginViewModel extends ChangeNotifier {
 
     if (result['success']) {
       loginState = LoginState.success;
+
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('userId', result['userId']);
+      prefs.setString('message', result['message']);
     } else {
       loginState = LoginState.failure;
       errorMessage = result['message'];
@@ -38,6 +43,7 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
     return result;
   }
+
   Future<Map<String, dynamic>> registerUser(BuildContext context) async {
     registerState = RegisterState.loading;
     notifyListeners();
@@ -56,6 +62,11 @@ class LoginViewModel extends ChangeNotifier {
 
     if (result['success']) {
       registerState = RegisterState.success;
+
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('user', result['userId']);
+      prefs.setString('message', result['message']);
     } else {
       registerState = RegisterState.failure;
       registerErrorMessage = result['message'];
