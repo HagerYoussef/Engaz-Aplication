@@ -38,7 +38,7 @@ class OtpViewModel extends ChangeNotifier {
     _setStatus(OtpStatus.loading);
 
     try {
-      final response = await _otpService.verifyOtp(userId: userId!, code: code!);
+      final response = await _otpService.verifyOtp( code: code!);
 
       if (response.success) {
         _message = "تم التحقق من رمز التفعيل بنجاح";
