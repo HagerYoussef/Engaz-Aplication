@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class UploadButtonTranslation extends StatelessWidget {
+class UploadButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const UploadButtonTranslation({Key? key, required this.onPressed}) : super(key: key);
+  const UploadButton({Key? key, required this.onPressed}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -11,22 +11,19 @@ class UploadButtonTranslation extends StatelessWidget {
       width: 343,
       height: 48,
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F2F2), // اللون الخلفي
-        borderRadius: BorderRadius.circular(16), // الحدود الدائرية
+        color: const Color(0xFFF2F2F2),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
-            "الرجاء إضافة المرفقات المراد ترجمتها",
-            style: TextStyle(
-              fontSize: 14, // حجم الخط
-              color: Color(0xffB3B3B3), // اللون الرمادي
-            ),
+            "الرجاء إضافة المرفقات المراد طباعتها",
+            style: TextStyle(fontSize: 14, color: Color(0xffB3B3B3)),
           ),
           IconButton(
-            onPressed: onPressed, // عند الضغط على الزر، يتم تنفيذ onPressed
-            icon: Image.asset("assets/images/img18.png"), // أيقونة الملف
+            onPressed: onPressed,
+            icon: Image.asset("assets/images/img18.png"),
           ),
         ],
       ),

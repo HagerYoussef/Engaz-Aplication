@@ -1,117 +1,56 @@
+import 'dart:convert';
+
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
+import 'package:http/http.dart' as http;
 
-class TranslationRequestViewModel extends ChangeNotifier {
-  final List<String> availableLanguages = [
-    'إنجليزي(5 دينار /100 كلمة)',
-    'فرنسي(5 دينار /100 كلمة) ',
-    'اسباني(5 دينار /100 كلمة)',
-    'الماني(5 دينار /100 كلمة)',
-    'ايطالي(5 دينار /100 كلمة)',
-    'صيني(5 دينار /100 كلمة)'
-  ];
+class ApiService {
+  static const String _baseUrl = 'https://wckb4f4m-3000.euw.devtunnels.ms/api';
 
-  final List<PlatformFile> selectedFiles = [];
-  final List<String> selectedLanguages = [];
+  static Future<bool> submitTranslationRequest({
+    required String fileLanguage,
+    required List<String> translationLanguages,
+    required String notes,
+    required String deliveryMethod,
+    String? address,
+    required List<PlatformFile> files,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/order/translation');
 
-  String? selectedLanguage;
-  String deliveryOption = '';
-  List<String> selectedTargetLanguages = [];
-  String notes = '';
-
-  // إضافة controller للملاحظات
-  TextEditingController notesController = TextEditingController();
-
-  void setNotes(String value) {
-    notes = value;
-    notifyListeners();
-  }
-
-  void addTargetLanguage(String language) {
-    if (!selectedTargetLanguages.contains(language)) {
-      selectedTargetLanguages.add(language);
-      notifyListeners();
-    }
-  }
-
-  void removeTargetLanguage(String language) {
-    selectedTargetLanguages.remove(language);
-    notifyListeners();
-  }
-
-  void selectLanguage(String? language) {
-    if (language != null) {
-      selectedLanguage = language;
-      selectedLanguages.remove(language);
-      selectedLanguages.insert(0, language);
-      notifyListeners();
-    }
-  }
-
-  void addLanguage(String language) {
-    if (!selectedLanguages.contains(language)) {
-      selectedLanguages.add(language);
-      notifyListeners();
-    }
-  }
-
-  void removeLanguage(String language) {
-    selectedLanguages.remove(language);
-    notifyListeners();
-  }
-
-  void updateNotes(String value) {
-    notes = value;
-    notifyListeners();
-  }
-
-  Future<void> pickFile() async {
     try {
-      final result = await FilePicker.platform.pickFiles();
-      if (result != null && result.files.isNotEmpty) {
-        selectedFiles.add(result.files.first);
-        notifyListeners();
+      var request = http.MultipartRequest('POST', uri);
+
+
+      request.fields['fileLanguage'] = fileLanguage;
+      request.fields['translationLanguages'] = jsonEncode(translationLanguages);
+      request.fields['notes'] = notes;
+      request.fields['methodDelivery'] = deliveryMethod;
+
+      if (deliveryMethod == 'توصيل' && address != null) {
+        request.fields['Address'] = address;
+      }
+
+
+      for (var file in files) {
+        if (file.path != null) {
+          request.files.add(await http.MultipartFile.fromPath(
+            'otherDocs',
+            file.path!,
+            filename: file.name,
+          ));
+        }
+      }
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print('API Error: ${response.statusCode}');
+        return false;
       }
     } catch (e) {
-      debugPrint("Error picking file: $e");
-    }
-  }
-
-  void removeFile(PlatformFile file) {
-    selectedFiles.remove(file);
-    notifyListeners();
-  }
-
-  String getFileIconPath(String extension) {
-    switch (extension.toLowerCase()) {
-      case 'pdf':
-        return 'assets/images/img10.png';
-      case 'doc':
-      case 'docx':
-        return 'assets/images/img12.png';
-      case 'xls':
-      case 'xlsx':
-        return 'assets/images/img11.png';
-      default:
-        return 'assets/file.png';
-    }
-  }
-
-  void openFile(String? path) {
-    OpenFile.open(path);
-  }
-
-  bool canSubmit() {
-    return selectedLanguage != null &&
-        selectedLanguages.isNotEmpty &&
-        selectedFiles.isNotEmpty;
-  }
-
-  void addSelectedLanguage(String language) {
-    if (!selectedLanguages.contains(language)) {
-      selectedLanguages.add(language);
-      notifyListeners();
+      print('API Exception: $e');
+      return false;
     }
   }
 }

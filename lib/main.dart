@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/routing/app_routes.dart';
 import 'features/auth/forgetPassword/view/otp_screen.dart';
+import 'features/translation _request/view/translation_request_page.dart';
 
 void main() {
   runApp(
@@ -25,8 +26,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/',
-      routes: AppRoutes.routes,
+      //initialRoute: '/',
+      home: TranslationRequestPage(),
+      //routes: AppRoutes.routes,
     );
   }
 }
