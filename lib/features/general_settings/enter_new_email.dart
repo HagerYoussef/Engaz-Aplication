@@ -1,16 +1,15 @@
-import 'dart:convert';
-import 'package:engaz_app/features/auth/login/widgets/login_text_feild.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import '../auth/forgetPassword/view/otp_screen.dart';
+import '../auth/login/view/login_screen.dart';
 import '../auth/login/viewmodel/login_viewmodel.dart';
 
-class ChangePhoneScreen extends StatelessWidget {
-  const ChangePhoneScreen({super.key});
-
+class EnterNewEmail extends StatelessWidget {
+  const EnterNewEmail({super.key});
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -23,6 +22,7 @@ class ChangePhoneScreen extends StatelessWidget {
             double padding = screenWidth > 600 ? 48 : 24;
             double imageWidth = screenWidth > 600 ? 250 : 204;
             double buttonHeight = screenWidth > 600 ? 60 : 50;
+
             return Stack(
               children: [
                 SingleChildScrollView(
@@ -36,7 +36,7 @@ class ChangePhoneScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             const Text(
-                              "تغيير رمز الجوال ",
+                              "تغيير البريد الالكتروني ",
                               style: TextStyle(
                                 color: Color(0xff1D1D1D),
                                 fontWeight: FontWeight.w600,
@@ -57,22 +57,13 @@ class ChangePhoneScreen extends StatelessWidget {
                             width: imageWidth, height: imageWidth * 0.37),
                         const SizedBox(height: 16),
                         const Text(
-                          "رقم الجوال الجديد",
+                          "البريد الالكتروني الجديد",
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               fontFamily: 'IBM_Plex_Sans_Arabic'),
                         ),
-                        const Text(
-                          "الرجاء ادخال رقم الجوال الجديد لاستقبال رمز التفعيل",
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xffB3B3B3),
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
-                        ),
-                        const SizedBox(height: 16),
-                        const LoginTextField(), // تلتقط من خلالها رقم الجوال وتخزنه في LoginViewModel
+                        const CustomTextFeild2(),
                         const SizedBox(height: 16),
                         SizedBox(
                           width: double.infinity,
@@ -80,13 +71,13 @@ class ChangePhoneScreen extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () async {
                               final viewModel = Provider.of<LoginViewModel>(context, listen: false);
-                              final phone = viewModel.userInput;
+                              final email = viewModel.userInput;
 
-                              if (phone.isEmpty) {
+                              if (email.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                      "يرجى إدخال البيانات المطلوبة",
+                                      "يرجى إدخال البريد الإلكتروني الجديد",
                                       style: TextStyle(fontFamily: 'IBM_Plex_Sans_Arabic'),
                                     ),
                                     backgroundColor: Colors.red,
@@ -100,35 +91,37 @@ class ChangePhoneScreen extends StatelessWidget {
                                 final token = prefs.getString('authToken') ?? '';
                                 final userId = JwtDecoder.decode(token)['user_id'];
 
-                                final response = await http.put(
-                                  Uri.parse("http://localhost:3000/api/user/$userId/changephone"),
+                                final response = await http.post(
+                                  Uri.parse('http://localhost:3000/api/user/$userId/chgnageemail'),
                                   headers: {
-                                    "Content-Type": "application/json",
-                                    "Authorization": "Bearer $token"
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer $token',
                                   },
-                                  body: jsonEncode({
-                                    "phone": phone,
-                                    "countrycode": "+20", // ثابت مؤقتًا، تقدر تخليه قابل للتعديل لو حبيت
-                                  }),
+                                  body: jsonEncode({"email": email}),
                                 );
 
                                 final data = jsonDecode(response.body);
 
                                 if (response.statusCode == 200) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => OtpScreen(
-                                        contactInfo: phone,
-                                        contactType: 'phone',
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        data['message'] ?? 'تم تغيير البريد الإلكتروني بنجاح',
+                                        style: const TextStyle(fontFamily: 'IBM_Plex_Sans_Arabic'),
                                       ),
+                                      backgroundColor: Colors.green,
                                     ),
+                                  );
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                        (route) => false,
                                   );
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        data['message'] ?? 'حدث خطأ غير متوقع',
+                                        data['message'] ?? 'فشل في تغيير البريد الإلكتروني',
                                         style: const TextStyle(fontFamily: 'IBM_Plex_Sans_Arabic'),
                                       ),
                                       backgroundColor: Colors.red,
@@ -139,7 +132,7 @@ class ChangePhoneScreen extends StatelessWidget {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      "فشل الاتصال بالخادم: $e",
+                                      'فشل الاتصال بالخادم: $e',
                                       style: const TextStyle(fontFamily: 'IBM_Plex_Sans_Arabic'),
                                     ),
                                     backgroundColor: Colors.red,
@@ -176,3 +169,65 @@ class ChangePhoneScreen extends StatelessWidget {
     );
   }
 }
+
+class CustomTextFeild2 extends StatefulWidget {
+  const CustomTextFeild2({super.key});
+
+  @override
+  State<CustomTextFeild2> createState() => _CustomTextFeild2State();
+}
+
+class _CustomTextFeild2State extends State<CustomTextFeild2> {
+  late FocusNode _focusNode;
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final viewModel = Provider.of<LoginViewModel>(context, listen: false);
+    _controller.addListener(() => viewModel.setUserInput(_controller.text));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        decoration: InputDecoration(
+          hintText: "ادخل البريد الإلكتروني الجديد",
+          hintStyle: const TextStyle(
+            color: Color(0xffB3B3B3),
+            fontWeight: FontWeight.w500,
+            fontSize: 13,
+            fontFamily: 'IBM_Plex_Sans_Arabic',
+          ),
+          filled: true,
+          fillColor: const Color(0xffFAFAFA),
+          border: OutlineInputBorder(
+            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        ),
+        keyboardType: TextInputType.emailAddress,
+      ),
+    );
+  }
+}
+
