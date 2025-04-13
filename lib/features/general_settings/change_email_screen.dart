@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'package:engaz_app/features/general_settings/otp_screen_change_email_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import '../auth/forgetPassword/view/otp_screen.dart';
 import '../auth/login/viewmodel/login_viewmodel.dart';
 
 class ChangeEmailScreen extends StatelessWidget {
@@ -114,9 +114,9 @@ class ChangeEmailScreen extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => OtpScreen(
-                                        contactInfo: email,
-                                        contactType: 'email',
+                                      builder: (context) => OtpScreenChangeEmailScreen(
+                                        phone: "",
+                                        email: email,
                                       ),
                                     ),
                                   );
