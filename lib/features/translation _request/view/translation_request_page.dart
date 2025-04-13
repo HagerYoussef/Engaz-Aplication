@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'dart:async';
+import '../../order_details/order_details_page.dart';
 import '../../printing_request/widgets/upload_button.dart';
 import '../../saved_order/view/saved_order.dart';
 import '../viewmodel/translation_request_viewmodel.dart';
@@ -452,10 +453,11 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
           ),
         ),
         onPressed: () async {
-          if (isSubmitting) return;
-          setState(() => isSubmitting = true);
-          await submitTranslationRequest();
-          setState(() => isSubmitting = false);
+          // if (isSubmitting) return;
+          // setState(() => isSubmitting = true);
+          // await submitTranslationRequest();
+          // setState(() => isSubmitting = false);
+Navigator.push(context,MaterialPageRoute(builder: (context)=>OrderDetailsPage()));
         },
         child: isSubmitting
             ? const CircularProgressIndicator(color: Colors.white)
