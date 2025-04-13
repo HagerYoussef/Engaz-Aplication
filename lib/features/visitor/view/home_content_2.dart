@@ -1,8 +1,8 @@
-import 'package:engaz_app/features/visitor/view/please_login.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../home_screen/widgets/category_card.dart';
+import '../home_screen_2.dart';
 
 class HomeContent2 extends StatelessWidget {
   final PageController _pageController = PageController();
@@ -97,13 +97,13 @@ class HomeContent2 extends StatelessWidget {
                     title: 'الترجمة',
                     description:
                     'نقدم أفضل خدمات الترجمة لأكثر من 10 لغات حول العالم',
-                    image: 'assets/images/img5.png', destinationPage: PleaseLogin(),
+                    image: 'assets/images/img5.png', destinationPage: HomePage2(),
                   ),
                   const SizedBox(height: 10),
                   CategoryCard(
                     title: 'الطباعة',
                     description: 'نقدم أفضل جودة للطباعة بأسعار تنافسية',
-                    image: 'assets/images/img6.png', destinationPage: PleaseLogin(),
+                    image: 'assets/images/img6.png', destinationPage: HomePage2(),
                   ),
                 ],
               ),
