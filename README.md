@@ -1,16 +1,33 @@
-# engaz_app
+# ENGAZ
 
-A new Flutter project.
+ENGAZ is a professional business platform designed to streamline company formation services, especially in the UAE. This project provides a powerful digital experience to assist users in navigating company setup processes efficiently.
 
-## Getting Started
+## 🔹 Project Vision
 
-This project is a starting point for a Flutter application.
+To create a seamless and intelligent system that simplifies the process of starting and managing companies, offering users real-time services, transparency, and ease of use.
 
-A few resources to get you started if this is your first Flutter project:
+## 🎯 Core Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- 🏢 Company Formation Services
+- 🌐 Multi-language Support (Arabic, English)
+- 📞 Real-time Customer Assistance
+- 📋 Easy-to-navigate Forms and Requests
+- 🔒 Secure User Authentication
+- 📱 Responsive Design for Mobile & Desktop
+- 📂 Digital Document Management
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🖥️ Tech Stack
+
+- **Frontend**: Flutter (Mobile & Web)
+- **State Management**: Provider
+- **Architecture**: MVVM
+- **API**: RESTful API Integration
+
+
+## 📬 Contact
+
+For business inquiries or technical support:
+
+📧 Email: [hager.mohammed.work@gmail.com]   
+📞 WhatsApp: [+20-127-242-8076]
+
