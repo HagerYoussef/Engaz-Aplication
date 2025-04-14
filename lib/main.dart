@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/routing/app_routes.dart';
 import 'features/address/view/address.dart';
+import 'features/address/view_model/add_address_view_model.dart';
 import 'features/auth/forgetPassword/view/otp_screen.dart';
+import 'features/printing_with_api/print.dart';
 
 void main() {
   runApp(
@@ -13,7 +15,8 @@ void main() {
           providers: [
             ChangeNotifierProvider(create: (_) => SplashViewModel()),
             ChangeNotifierProvider(create: (_) => LoginViewModel()),
-
+            ChangeNotifierProvider(create: (_) =>
+                AddAddressViewModel()),
           ],
       child : MyApp()
   ));
@@ -28,7 +31,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       //initialRoute: '/',
-      home:TranslationRequestPage()
+      home:PrinterRequestPage()
       //routes: AppRoutes.routes,
     );
   }
