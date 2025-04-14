@@ -124,5 +124,51 @@ class AddAddressViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+  Future<void> deleteAddress(BuildContext context) async {
+    isLoading = true;
+    notifyListeners();
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? addressId = prefs.getString('address_id');
+
+    if (addressId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("لم يتم العثور على العنوان ❌")),
+      );
+      isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    final url = 'http://localhost:3000/api/address/$addressId';
+    final headers = {"Content-Type": "application/json"};
+
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        await prefs.remove('address_id');
+        locationController.clear();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("تم حذف العنوان بنجاح ✅")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("فشل في حذف العنوان ❌")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("حدث خطأ أثناء الحذف ❌")),
+      );
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 
 }
