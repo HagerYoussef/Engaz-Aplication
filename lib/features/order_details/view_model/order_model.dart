@@ -28,16 +28,16 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       number: json['number'],
-      data: json['data'],
-      time: json['time'],
-      status: json['status'],
+      data: json['date'] ?? '',  // هنا إذا كانت null نضع سلسلة فارغة
+      time: json['time'] ?? '',  // هنا إذا كانت null نضع سلسلة فارغة
+      status: json['status'] ?? '',  // هنا إذا كانت null نضع سلسلة فارغة
       delivery: Delivery.fromJson(json['delivery']),
-      translationFrom: json['translationfrom'],
+      translationFrom: json['translationfrom'] ?? '',  // هنا إذا كانت null نضع سلسلة فارغة
       translationTo: (json['translationto'] as List)
           .map((item) => TranslationTo.fromJson(item))
           .toList(),
-      notes: json['notes'] ?? '',
-      files: List<String>.from(json['files']),
+      notes: json['notes'] ?? '',  // إذا كانت null نضع سلسلة فارغة
+      files: List<String>.from(json['files'] ?? []),  // إذا كانت null نضع قائمة فارغة
     );
   }
 }
@@ -82,14 +82,26 @@ class TranslationTo {
 
 Future<OrderModel> fetchOrderDetails() async {
   final prefs = await SharedPreferences.getInstance();
+  //final orderId = prefs.getInt('id');
   final orderId = prefs.getInt('id');
+  //final token = prefs.getString('token');
 
-  if (orderId == null) {
-    print('رقم الطلب غير موجود في SharedPreferences');
-  }
+  // if (orderId == null) {
+  //   print('رقم الطلب غير موجود في SharedPreferences');
+  //   throw Exception('رقم الطلب غير موجود');
+  // }
+
+  // if (token == null) {
+  //   print('التوكن غير موجود في SharedPreferences');
+  //   throw Exception('التوكن غير موجود');
+  // }
 
   final response = await http.get(
-    Uri.parse('http://localhost:3000/api/order/$orderId'),
+    Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/48'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',
+    },
   );
 
   if (response.statusCode == 200) {

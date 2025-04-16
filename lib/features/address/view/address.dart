@@ -148,6 +148,7 @@ class AddAddressScreen extends StatelessWidget {
                               onPressed: model.isLoading
                                   ? null
                                   : () {
+
                                 model.addAddress(context);
                               },
                               child: model.isLoading

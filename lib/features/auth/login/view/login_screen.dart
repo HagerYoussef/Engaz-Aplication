@@ -94,6 +94,12 @@ class LoginScreen extends StatelessWidget {
                                   final result = await viewModel.loginUser();
 
                                   if (result['success']) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(result['message']),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(

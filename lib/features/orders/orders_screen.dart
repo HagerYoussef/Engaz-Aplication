@@ -5,9 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(MaterialApp(home: OrdersScreen()));
-}
+
 
 class OrdersScreen extends StatefulWidget {
   @override
@@ -16,13 +14,13 @@ class OrdersScreen extends StatefulWidget {
 
 class _OrdersScreenState extends State<OrdersScreen> {
   bool isTranslationSelected = true;
-  late String userId;
+  //late String userId;
   late Future<List<dynamic>> _ordersFuture;
 
   final Map<String, Map<String, dynamic>> statusDetails = {
     'Under Review': {
       'tab': 'جديد',
-      'text': 'قيد المراجعة',
+      'text': 'Under Review',
       'color': Colors.orange,
       'image': 'assets/images/img16.png',
       'apiStatus': 'new'
@@ -59,7 +57,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Future<void> _initializeData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      userId = prefs.getString('id') ?? '';
+      //userId = prefs.getString('id') ?? '';
     });
     _ordersFuture = _fetchOrders('جديد');
   }
@@ -68,12 +66,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final type = isTranslationSelected ? 'translation' : 'print';
     final statusParam = _getApiStatusForTab(tabStatus);
 
+
+    final token = await _getAuthToken();
+
     final response = await http.post(
-      Uri.parse('http://localhost:3000/api/order/$userId'),
-      headers: {'Content-Type': 'application/json'},
+
+      Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/6abd1b36-1dd1-4609-a164-de89bc5af01d?type=translation&status=$statusParam'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',  // استخدم التوكن هنا بشكل ديناميكي
+      },
       body: jsonEncode({
         'type': type,
-        'status': statusParam
+        'status': statusParam,
       }),
     );
 
@@ -82,6 +87,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
     } else {
       throw Exception('Failed to load orders: ${response.statusCode}');
     }
+  }
+
+  Future<String> _getAuthToken() async {
+
+    return 'token';
   }
 
   String _getApiStatusForTab(String tabStatus) {

@@ -222,37 +222,71 @@ class AttachmentIcon extends StatelessWidget {
 class CancelOrderButton extends StatelessWidget {
   const CancelOrderButton({super.key});
 
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+        onPressed: () {
+          Navigator.push(context,MaterialPageRoute(builder: (context)=>CancelOrder()));
+
+        },
+        child: const Text('إلغاء الطلب', style: TextStyle(color: Colors.white)),
+      ),
+    );
+  }
+}
+
+class CancelOrder extends StatelessWidget {
+  final TextEditingController _reasonController = TextEditingController();
+
   Future<void> _cancelOrder(BuildContext context) async {
-
     final prefs = await SharedPreferences.getInstance();
-    final orderId = prefs.getString('id');
+    // final orderId = prefs.getInt('orderId');
+    // if (orderId == null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('Order ID not found')),
+    //   );
+    //   return;
+    // }
 
-    if (orderId == null) {
-
+    final reason = _reasonController.text.trim();
+    if (reason.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Order ID not found')),
+        const SnackBar(content: Text('من فضلك أدخل سبب الإلغاء')),
       );
       return;
     }
 
 
-    final url = Uri.parse('http://localhost:3000/api/order/$orderId');
-    final response = await http.delete(url);
+    final orderId = 48;
+    final token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';  // تأكد من استخدام التوكن الصحيح
+
+    final url = Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/$orderId');
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode({
+        'reason': reason,
+      }),
+    );
 
     if (response.statusCode == 200) {
-
       final responseBody = json.decode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(responseBody['message'])),
       );
     } else if (response.statusCode == 400) {
-
       final responseBody = json.decode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(responseBody['message'])),
       );
     } else {
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Something went wrong')),
       );
@@ -261,13 +295,104 @@ class CancelOrderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-        onPressed: () {
-          _cancelOrder(context);
-        },
-        child: const Text('إلغاء الطلب', style: TextStyle(color: Colors.white)),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "الغاء الطلب ",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+        ),
+        centerTitle: true,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Image.asset("assets/images/img23.png"),
+        ),
+      ),
+      body: Column(
+        children: [
+          Center(child: Image.asset("assets/images/img24.png")),
+          const SizedBox(height: 30),
+          const Directionality(
+            textDirection: TextDirection.rtl,
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: Text(
+                  "سبب الالغاء",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+              ),
+            ),
+          ),
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(
+                controller: _reasonController,
+                decoration: InputDecoration(
+                  hintText: 'توضيح سبب الالغاء',
+                  hintStyle: const TextStyle(color: Color(0xffB3B3B3)),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xffF2F2F2), width: 1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                ),
+                maxLines: 5,
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              OutlinedButton(
+                onPressed: () {
+                  _cancelOrder(context);
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFE50930), width: 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  minimumSize: const Size(164, 5),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text(
+                  'الغاء',
+                  style: TextStyle(
+                    color: Color(0xFFE50930),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff409EDC),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  minimumSize: const Size(164, 5),
+                ),
+                child: const Text(
+                  'تراجع',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -300,23 +300,56 @@ class _SavedAddressState extends State<SavedAddress> {
 
   Future<void> _fetchAddresses() async {
     final prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getString('userId');
-    if (userId == null) {
-      print('User ID not found');
+    String? userId = '6abd1b36-1dd1-4609-a164-de89bc5af01d';
+    //String? userId = prefs.getString('userId');
+    String? token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
+    //String? token = prefs.getString('token');
+    String? addressId;
+
+    print('userId: $userId');
+    print('token: $token');
+
+    if (userId == null || token == null) {
+      print('User ID or token not found');
       return;
     }
 
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/api/address/$userId'),
+        Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/address/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // إضافة التوكن هنا
+        },
       );
 
       if (response.statusCode == 200) {
+        print('success ${response.body}');
         var data = json.decode(response.body);
         setState(() {
-          addresses = data['addresses'];
+          addresses = (data['addresses'] as List)
+              .map((item) => AddressModel.fromJson(item))
+              .toList();
+          print('addresses set in state. Length: ${addresses.length}');
+
+          // خزن أول addressId لو فيه بيانات
+          if (addresses.isNotEmpty) {
+            addressId = addresses.first.id;
+            print('Saved addressId: $addressId');
+          }
         });
-      } else {
+        await prefs.setString('addressId', addressId!);
+
+        // اطبع كل عنوان
+        for (var address in addresses) {
+          print('Address: ${address.address}');
+          print('Name: ${address.name}');
+          print('Location: ${address.location}');
+          print('ID: ${address.id}');
+          print('------------------------');
+        }
+      }
+      else {
         print('Failed to load addresses: ${response.statusCode}');
       }
     } catch (e) {
@@ -358,9 +391,10 @@ class _SavedAddressState extends State<SavedAddress> {
                     ),
                     const SizedBox(height: 20),
                     ...addresses.map((address) => _buildAddressCard(
-                      address['name'],
-                      address['address'],
+                      address.name,
+                      address.address,
                     )).toList(),
+
                     const SizedBox(height: 10),
                   ],
                 ),
@@ -513,4 +547,26 @@ class _SavedAddressState extends State<SavedAddress> {
     );
   }
 
+}
+class AddressModel {
+  final String id;
+  final String name;
+  final String address;
+  final String location;
+
+  AddressModel({
+    required this.id,
+    required this.name,
+    required this.address,
+    required this.location,
+  });
+
+  factory AddressModel.fromJson(Map<String, dynamic> json) {
+    return AddressModel(
+      id: json['id']??'',
+      name: json['name']??'',
+      address: json['address']??'',
+      location: json['location']??'',
+    );
+  }
 }
