@@ -47,28 +47,26 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
     }
 
     setState(() => isSubmitting = true);
-
-    // إرسال كل لغة بشكل منفصل
     for (var language in selectedLanguages) {
       final success = await ApiService.submitTranslationRequest(
-        fileLanguage: selectedLanguage!, // اللغة المصدر
-        translationLanguages: [language], // إرسال كل لغة بشكل منفصل
-        notes: notesController.text,
-        deliveryMethod: _selectedMethod ?? 'استلام من الفرع',
-        address: _selectedMethod == 'توصيل' ? selectedAddress : null,
-        files: selectedFiles,
-        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',
+          fileLanguage: selectedLanguage!,
+          translationLanguage: language, // بعتناها كـ String واحدة
+          notes: notesController.text,
+          deliveryMethod: _selectedMethod ?? 'استلام من الفرع',
+          address: _selectedMethod == 'توصيل' ? selectedAddress : null,
+          files: selectedFiles,
+          token: '...'
       );
 
-      // إذا فشل في إرسال أي طلب، نوقف ونعرض رسالة
       if (!success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('فشل في إرسال الطلب، الرجاء المحاولة لاحقًا')),
+          const SnackBar(content: Text('فشل في إرسال الطلب')),
         );
         setState(() => isSubmitting = false);
         return;
       }
     }
+
 
     setState(() => isSubmitting = false);
 

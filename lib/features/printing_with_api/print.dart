@@ -1,7 +1,9 @@
+import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth/register/widgets/custom_text_feild.dart';
 import '../order_details/order_details_page.dart';
@@ -24,8 +26,10 @@ class PrinterRequestPage extends StatefulWidget {
 
 class _PrinterRequestPageState extends State<PrinterRequestPage> {
   final List<PlatformFile> selectedFiles = [];
-  final List<String> availableLanguages = ['الوان', 'ابيض واسود'];
-  final List<String> availableLanguages2 = ['مجلد', '..'];
+  final List<String> availableLanguages = ['White and Black'];
+  final List<String> availableLanguages2 = [
+    'cubed',
+  ];
   String? deliveryMethod;
   String? selectedAddress;
   String? selectedLanguage;
@@ -55,8 +59,7 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
         selectedLanguage2 == null ||
         _pagesController.text.isEmpty ||
         _copiesController.text.isEmpty ||
-        deliveryMethod == null ||
-        selectedAddress == null) {
+        deliveryMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('الرجاء ملء جميع الحقول المطلوبة')),
       );
@@ -68,39 +71,64 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://10.0.2.2:3000/api/order/printing'),
+        Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/printing'),
       );
+//تست123
+      request.headers['Authorization'] =
+          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
+      request.headers['Content-Type'] = 'multipart/form-data';
 
       for (var file in selectedFiles) {
         if (file.path != null) {
           request.files.add(await http.MultipartFile.fromPath(
-            'files',
+            'otherDocs',
             file.path!,
           ));
         }
       }
 
-      request.fields.addAll({
-        'printColor': selectedLanguage!,
-        'bindingType': selectedLanguage2!,
-        'pages': _pagesController.text,
-        'copies': _copiesController.text,
-        'deliveryMethod': deliveryMethod!,
-        'address': selectedAddress!,
-        'notes': _notesController.text,
-      });
+      List<Map<String, dynamic>> detailsList = [];
+      if (detailsList.length > 2) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('لا يجب رفع اكتر من ملفين')),
+        );
+      }
+      for (int i = 0; i < selectedFiles.length; i++) {
+        detailsList.add({
+          "color": selectedLanguage,
+          "cover": selectedLanguage2,
+          "pages": int.tryParse(_pagesController.text) ?? 0,
+          "copies": int.tryParse(_copiesController.text) ?? 0,
+        });
+      }
+
+      request.fields['details'] = jsonEncode(detailsList);
+      request.fields['methodOfDelivery'] = deliveryMethod!;
+
+      if (selectedAddress != null) {
+        request.fields['address'] = selectedAddress!;
+      }
+
+      if (_notesController.text.isNotEmpty) {
+        request.fields['notes'] = _notesController.text;
+      }
 
       var response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم الرفع بنجاح')),
+        );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) =>  SaveOrder()),
+          MaterialPageRoute(builder: (context) => SaveOrder()),
         );
       } else {
+        print('response body :$responseBody');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ: ${response.statusCode} - $responseBody')),
+          SnackBar(
+              content: Text('خطأ: ${response.statusCode} - $responseBody')),
         );
       }
     } catch (e) {
@@ -142,11 +170,14 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               if (selectedLanguage != null)
-                                _buildSummaryItem('لون الطباعة', selectedLanguage!),
+                                _buildSummaryItem(
+                                    'لون الطباعة', selectedLanguage!),
                               if (selectedLanguage2 != null)
-                                _buildSummaryItem('نوع التغليف', selectedLanguage2!),
+                                _buildSummaryItem(
+                                    'نوع التغليف', selectedLanguage2!),
                               GestureDetector(
-                                onTap: () => setState(() => selectedFiles.removeAt(index)),
+                                onTap: () => setState(
+                                    () => selectedFiles.removeAt(index)),
                                 child: Image.asset(
                                   "assets/images/img59.png",
                                   width: 40,
@@ -159,9 +190,11 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               if (_pagesController.text.isNotEmpty)
-                                _buildSummaryItem('عدد الصفحات', _pagesController.text),
+                                _buildSummaryItem(
+                                    'عدد الصفحات', _pagesController.text),
                               if (_copiesController.text.isNotEmpty)
-                                _buildSummaryItem('عدد النسخ', _copiesController.text),
+                                _buildSummaryItem(
+                                    'عدد النسخ', _copiesController.text),
                               Image.asset(iconPath, width: 40, height: 40),
                             ],
                           ),
@@ -185,22 +218,19 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
           Text(title, style: const TextStyle(color: Color(0xffB3B3B3))),
           Text(value,
               style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff409EDC)
-              )),
+                  fontWeight: FontWeight.bold, color: Color(0xff409EDC))),
         ],
       ),
     );
   }
 
-  Widget _buildDropdown(String label, List<String> options, String? value, Function(String?) onChanged) {
+  Widget _buildDropdown(String label, List<String> options, String? value,
+      Function(String?) onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold
-        )),
+        Text(label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
         Container(
           width: 343,
@@ -215,9 +245,9 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
               value: value,
               isExpanded: true,
               icon: const Icon(Icons.keyboard_arrow_down),
-              items: options.map((e) =>
-                  DropdownMenuItem(value: e, child: Text(e))
-              ).toList(),
+              items: options
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
               onChanged: onChanged,
               hint: Text('اختر $label'),
             ),
@@ -238,8 +268,7 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text('طلب طباعه',
-              style: TextStyle(color: Colors.black)),
+          title: const Text('طلب طباعه', style: TextStyle(color: Colors.black)),
           backgroundColor: const Color(0xffF8F8F8),
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.black),
@@ -248,127 +277,135 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-            Center(
-            child: Image.asset('assets/images/img56.png', height: 100),
-          ),
-          const SizedBox(height: 16),
-          const Center(
-            child: Text(
-                'طلب طباعه جديد',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(height: 4),
-          Center(
-            child:  Text(
-              'الرجاء ارفاق الملفات المراد طباعتها',
-              style: TextStyle(fontSize: 14, color: Color(0xffB3B3B3)),
-            ),),
-             SizedBox(height: 8),
-            const Text(
-                'المرفقات المراد طباعتها',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  UploadButton(
-                    onPressed: () {
-                      pickFile();
-                    },
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Image.asset('assets/images/img56.png', height: 100),
+                ),
+                const SizedBox(height: 16),
+                const Center(
+                  child: Text('طلب طباعه جديد',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(height: 4),
+                const Center(
+                  child: Text(
+                    'الرجاء ارفاق الملفات المراد طباعتها',
+                    style: TextStyle(fontSize: 14, color: Color(0xffB3B3B3)),
                   ),
-            const SizedBox(height: 8),
-            _buildSelectedFilesList(),
-            const SizedBox(height: 16),
-            _buildDropdown('اختر لون الطباعة', availableLanguages, selectedLanguage, (value) {
-              setState(() => selectedLanguage = value);
-            }),
-            _buildDropdown('اختر نوع التغليف', availableLanguages2, selectedLanguage2, (value) {
-              setState(() => selectedLanguage2 = value);
-            }),
-            const SizedBox(height: 16),
-            const Text('عدد الصفحات',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _pagesController,
-              keyboardType: TextInputType.number,
-              onChanged: (value) => setState(() {}),
-              decoration: InputDecoration(
-                hintText: 'عدد الصفحات المراد طباعتها',
-                filled: true,
-                fillColor:  const Color(0xffF2F2F2),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.circular(16),
                 ),
-                contentPadding:  const EdgeInsets.symmetric(
-                    vertical: 12, horizontal: 16),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text('عدد النسخ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _copiesController,
-              keyboardType: TextInputType.number,
-              onChanged: (value) => setState(() {}),
-              decoration: InputDecoration(
-                hintText: 'عدد النسخ المراد طباعتها',
-                filled: true,
-                fillColor: const Color(0xffF2F2F2),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.circular(16),
+                const SizedBox(height: 8),
+                const Text('المرفقات المراد طباعتها',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                UploadButton(
+                  onPressed: () {
+                    pickFile();
+                  },
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 12, horizontal: 16),
-              ),
-            ),
-            const SizedBox(height: 16),
-            InkWell(
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SavedAddress())),
-              child:  Image.asset("assets/images/img51.png"),
-            ),
-            const SizedBox(height: 16),
-            _buildSummaryCard(),
-            const SizedBox(height: 16),
-             DeliveryOptions(
-              onDeliveryMethodSelected: (method) =>
-                  setState(() => deliveryMethod = method),
-              onAddressSelected: (address) =>
-                  setState(() => selectedAddress = address),
-            ),
-            const SizedBox(height: 16),
-            const Text('الملاحظات',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            _buildTextField('ادخل الملاحظات الخاصة بك ان وجدت'),
-            const SizedBox(height: 16),
-             Card(
-              color: Colors.white,
-              child: Padding(
-                padding:  EdgeInsets.all(12.0),
-                child: Column(
-                  children: [
-                    const Text('قيمه الطلب',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const Divider(),
-                    _buildPriceRow('قيمه الخدمات', '70'),
-                    const Divider(),
-                    _buildPriceRow('الضريبه', '15'),
-                    const Divider(),
-                    _buildPriceRow('الاجمالي', '85', isTotal: true),
-                  ],
+                const SizedBox(height: 8),
+                _buildSelectedFilesList(),
+                const SizedBox(height: 16),
+                _buildDropdown(
+                    'اختر لون الطباعة', availableLanguages, selectedLanguage,
+                    (value) {
+                  setState(() => selectedLanguage = value);
+                }),
+                _buildDropdown(
+                    'اختر نوع التغليف', availableLanguages2, selectedLanguage2,
+                    (value) {
+                  setState(() => selectedLanguage2 = value);
+                }),
+                const SizedBox(height: 16),
+                const Text('عدد الصفحات',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                TextField(
+                  controller: _pagesController,
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: 'عدد الصفحات المراد طباعتها',
+                    filled: true,
+                    fillColor: const Color(0xffF2F2F2),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                const Text('عدد النسخ',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                TextField(
+                  controller: _copiesController,
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: 'عدد النسخ المراد طباعتها',
+                    filled: true,
+                    fillColor: const Color(0xffF2F2F2),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 16),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SavedAddress())),
+                  child: Image.asset("assets/images/img51.png"),
+                ),
+                const SizedBox(height: 16),
+                _buildSummaryCard(),
+                const SizedBox(height: 16),
+                DeliveryOptions(
+                  onDeliveryMethodSelected: (method) =>
+                      setState(() => deliveryMethod = method),
+                  onAddressSelected: (address) =>
+                      setState(() => selectedAddress = address),
+                ),
+                const SizedBox(height: 16),
+                const Text('الملاحظات',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                _buildTextField('ادخل الملاحظات الخاصة بك ان وجدت'),
+                const SizedBox(height: 16),
+                Card(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      children: [
+                        const Text('قيمه الطلب',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        const Divider(),
+                        _buildPriceRow('قيمه الخدمات', '70'),
+                        const Divider(),
+                        _buildPriceRow('الضريبه', '15'),
+                        const Divider(),
+                        _buildPriceRow('الاجمالي', '85', isTotal: true),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildSubmitButton(),
+              ],
             ),
-            const SizedBox(height: 16),
-            _buildSubmitButton(),
-         ],
           ),
         ),
       ),
-    ),
     );
   }
 
@@ -416,22 +453,23 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
           final iconPath = getFileIcon(extension);
 
           return Stack(
-              children: [
+            children: [
               GestureDetector(
-              onTap: () => OpenFile.open(file.path),
-          child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Image.asset(iconPath, width: 60, height: 60),
-          ),
-          ),
-          Positioned(
-          top: -15,
-          left: -10,
-          child: IconButton(
-          icon: const Icon(Icons.close, size: 20, color: Colors.red),
-          onPressed: () => setState(() => selectedFiles.remove(file)),
-          ),
-          )],
+                onTap: () => OpenFile.open(file.path),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset(iconPath, width: 60, height: 60),
+                ),
+              ),
+              Positioned(
+                top: -15,
+                left: -10,
+                child: IconButton(
+                  icon: const Icon(Icons.close, size: 20, color: Colors.red),
+                  onPressed: () => setState(() => selectedFiles.remove(file)),
+                ),
+              )
+            ],
           );
         }).toList(),
       ),
@@ -461,13 +499,13 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
         onPressed: _isLoading ? null : _submitOrder,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xff409EDC),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         child: _isLoading
             ? const CircularProgressIndicator(color: Colors.white)
             : const Text('ارسال الطلب',
-            style: TextStyle(fontSize: 16, color: Colors.white)),
+                style: TextStyle(fontSize: 16, color: Colors.white)),
       ),
     );
   }
@@ -489,7 +527,6 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
     );
   }
 }
-
 
 class SaveOrder extends StatelessWidget {
   @override
@@ -520,37 +557,37 @@ class SaveOrder extends StatelessWidget {
                             fontWeight: FontWeight.bold, fontSize: 15)),
                   ),
                 )),
-            Directionality(
+            const Directionality(
               textDirection: TextDirection.rtl,
               child: CustomTextField(hintText: "ادخل كود الخصم"),
             ),
-            Card(
+            const Card(
               color: Colors.white,
               elevation: 0,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: EdgeInsets.all(12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('قيمه الطلب',
+                    Text('قيمه الطلب',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
-                    const Divider(),
-                    const Row(
+                    Divider(),
+                    Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("قيمه الخدمات", style: TextStyle()),
                           Text("70"),
                         ]),
-                    const Divider(),
-                    const Row(
+                    Divider(),
+                    Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("الضريبه", style: TextStyle()),
                           Text("15"),
                         ]),
-                    const Divider(),
-                    const Row(
+                    Divider(),
+                    Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("الاجمالي",
@@ -618,6 +655,7 @@ class SaveOrder extends StatelessWidget {
     );
   }
 }
+
 class SuccessOrder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -629,9 +667,9 @@ class SuccessOrder extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("تم تسديد قيمة الطلب بنجاج",
+              const Text("تم تسديد قيمة الطلب بنجاج",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              SizedBox(
+              const SizedBox(
                 height: 60,
               ),
               Row(
@@ -665,7 +703,7 @@ class SuccessOrder extends StatelessWidget {
                     onPressed: () {},
                     style: OutlinedButton.styleFrom(
                       side:
-                      const BorderSide(color: Color(0xFF409EDC), width: 1),
+                          const BorderSide(color: Color(0xFF409EDC), width: 1),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
