@@ -36,7 +36,7 @@ class OrderDetailsPage extends StatelessWidget {
                 children: [
                   OrderInfoSection(order: order),
                   const SizedBox(height: 16.0),
-                  DeliveryInfoSection(delivery: order.delivery),
+                  DeliveryInfoSection(delivery: order.delivery, order: order,),
                   const SizedBox(height: 16.0),
                   TranslationLanguagesSection(
                     from: order.translationFrom,
@@ -65,46 +65,89 @@ class OrderInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
+    return  Card(
+        elevation: 0,
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
+        child: Padding(
+        padding: const EdgeInsets.all(12.0),
+    child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('رقم الطلب: ${order.number}'),
-          Text('التاريخ: ${order.data}'),
-          Text('الوقت: ${order.time}'),
-          Text('الحالة: ${order.status}'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('رقم الطلب ',
+                  style:
+                  TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('${order.number}', style:
+              TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ],
+          ),
+       Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('تاريخ الطلب ',
+              style:
+              TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          Text('${order.data}'),
+        ]),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('وقت الطلب',
+                    style:
+                    TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text('${order.time}'),
+              ]),
+        
+
         ],
       ),
-    );
+    ));
   }
 }
 
 class DeliveryInfoSection extends StatelessWidget {
   final Delivery delivery;
+  final OrderModel order;
 
-  const DeliveryInfoSection({super.key, required this.delivery});
+  const DeliveryInfoSection({super.key, required this.delivery, required this.order});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('معلومات التوصيل:', style: TextStyle(fontWeight: FontWeight.bold)),
-          Text('العنوان: ${delivery.address.isEmpty ? 'لا يوجد' : delivery.address}'),
-          Text('نوع التوصيل: ${delivery.type}'),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${order.status}'),
+              SizedBox(height: 10,),
+              Text('نوع التوصيل: ${delivery.type}'),
+            ],
+          ),
+
+          InkWell(
+            onTap: () {
+              // Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //         builder: (context) => ChatScreen()));
+            },
+            child: CircleAvatar(
+                backgroundColor: const Color(0xff409EDC),
+                child: Image.asset("assets/images/img19.png")),
+          ),
+
         ],
       ),
+
     );
   }
 }
@@ -122,6 +165,7 @@ class TranslationLanguagesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -130,12 +174,14 @@ class TranslationLanguagesSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('الترجمة من: $from'),
+          Text('اللغة المراد ترجمتها',
+              style: TextStyle(fontSize: 15, color: Color(0xffB3B3B3))),
+          Text('$from',style:  TextStyle(color: Color(0xff409EDC),)),
           const SizedBox(height: 8),
-          const Text('إلى:', style: TextStyle(fontWeight: FontWeight.bold)),
-          ...to.map((lang) => Text(
-            '${lang.arabicName} (${lang.name}) - ${lang.cost} جنيه',
-          )),
+          Text('اللغات المراد الترجمة إليها:',
+              style: TextStyle(fontSize: 15, color: Color(0xffB3B3B3))), ...to.map((lang) => Text(
+            '${lang.arabicName} (${lang.name}) - ${lang.cost} جنيه', style: TextStyle(color: Color(0xff409EDC))),
+          ),
         ],
       ),
     );
@@ -186,10 +232,10 @@ class AttachmentsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('المرفقات:', style: TextStyle(fontWeight: FontWeight.bold)),
-          ...files.map((file) => Row(
+          const Text('المرفقات',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),  ...files.map((file) => Row(
             children: [
-              const Icon(Icons.picture_as_pdf, color: Colors.red),
+               Image.asset("assets/images/img10.png"),
               const SizedBox(width: 8),
               Text(file),
             ],
@@ -220,24 +266,35 @@ class AttachmentIcon extends StatelessWidget {
 
 
 class CancelOrderButton extends StatelessWidget {
-  const CancelOrderButton({super.key});
-
-
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
         onPressed: () {
-          Navigator.push(context,MaterialPageRoute(builder: (context)=>CancelOrder()));
-
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CancelOrder()),
+          );
         },
-        child: const Text('إلغاء الطلب', style: TextStyle(color: Colors.white)),
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
+          minimumSize: const Size(164, 5),
+          backgroundColor: Color(0xffE50930),
+        ),
+        child: const Text(
+          'الغاء الطلب',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
       ),
     );
-  }
-}
-
+  }}
 class CancelOrder extends StatelessWidget {
   final TextEditingController _reasonController = TextEditingController();
 

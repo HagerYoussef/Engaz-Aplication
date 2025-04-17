@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       //initialRoute: '/',
-      home:SettingsScreen()
+      home:OrderDetailsPage()
       //routes: AppRoutes.routes,
     );
   }
