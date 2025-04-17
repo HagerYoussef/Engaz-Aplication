@@ -17,7 +17,9 @@ class TranslationRequestPage extends StatefulWidget {
 }
 
 class _TranslationRequestPageState extends State<TranslationRequestPage> {
-  String? deliveryMethod;
+  //String? deliveryMethod;
+  String _selectedMethod = ''; // متغير لتخزين الطريقة المختارة
+
   String? selectedAddress;
   bool isSubmitting = false;
   final List<String> fileTypes = [
@@ -27,12 +29,11 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
   ];
   List<PlatformFile> selectedFiles = [];
   final List<String> availableLanguages = [
-    'إنجليزي(5 دينار /100 كلمة)',
-    'فرنسي(5 دينار /100 كلمة) ',
-    'اسباني(5 دينار /100 كلمة)',
-    'الماني(5 دينار /100 كلمة)',
-    'ايطالي(5 دينار /100 كلمة)',
-    'صيني(5 دينار /100 كلمة)'
+    'Arabic',
+    'English',
+    'Dutch',
+    'French',
+
   ];
   List<String> selectedLanguages = [];
   final TextEditingController notesController = TextEditingController();
@@ -47,34 +48,34 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
 
     setState(() => isSubmitting = true);
 
-    final success = await ApiService.submitTranslationRequest(
-      fileLanguage: selectedLanguage!,
-      translationLanguages: selectedLanguages,
-      notes: notesController.text,
-      deliveryMethod: deliveryMethod ?? 'استلام من الفرع',
-      address: deliveryMethod == 'توصيل' ? selectedAddress : null,
-      files: selectedFiles,
-    );
+    // إرسال كل لغة بشكل منفصل
+    for (var language in selectedLanguages) {
+      final success = await ApiService.submitTranslationRequest(
+        fileLanguage: selectedLanguage!, // اللغة المصدر
+        translationLanguages: [language], // إرسال كل لغة بشكل منفصل
+        notes: notesController.text,
+        deliveryMethod: _selectedMethod ?? 'استلام من الفرع',
+        address: _selectedMethod == 'توصيل' ? selectedAddress : null,
+        files: selectedFiles,
+        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',
+      );
+
+      // إذا فشل في إرسال أي طلب، نوقف ونعرض رسالة
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('فشل في إرسال الطلب، الرجاء المحاولة لاحقًا')),
+        );
+        setState(() => isSubmitting = false);
+        return;
+      }
+    }
 
     setState(() => isSubmitting = false);
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم إرسال الطلب بنجاح')),
-      );
-
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('فشل في إرسال الطلب، الرجاء المحاولة لاحقًا')),
-      );
-    }
-  }
-  void _addLanguage(String language) {
-    if (!selectedLanguages.contains(language)) {
-      setState(() {
-        selectedLanguages.add(language);
-      });
-    }
+    // إذا كانت جميع الطلبات ناجحة، نعرض رسالة نجاح
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('تم إرسال الطلبات بنجاح')),
+    );
   }
 
   Future<void> pickFile() async {
@@ -205,8 +206,8 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
                 setState(() {
                   if (value != null) {
                     selectedLanguage = value;
-                    selectedLanguages.remove(value);
-                    selectedLanguages.insert(0, value);
+                    //selectedLanguages.remove(value);
+                   // selectedLanguages.insert(0, value);
                   }
                 });
               },
@@ -242,12 +243,13 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
               onChanged: (value) {
-                if (value != null) {
+                if (value != null && !selectedLanguages.contains(value)) {
                   setState(() {
                     selectedLanguages.add(value);
                   });
                 }
               },
+
             ),
           ),
         ),
@@ -305,15 +307,16 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
         DeliveryOptions(
           onDeliveryMethodSelected: (method) {
             setState(() {
-              deliveryMethod = method;
+              _selectedMethod = method!; // تحديث الطريقة المختارة
             });
+            print('تم اختيار طريقة التوصيل: $method');
           },
           onAddressSelected: (address) {
-            setState(() {
-              selectedAddress = address;
-            });
+            print('تم اختيار العنوان: $address');
           },
-        )
+        ),
+        SizedBox(height: 20),
+        Text('طريقة التوصيل المختارة: $_selectedMethod'),
       ],
     );
   }
@@ -357,22 +360,6 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
     );
   }
 
-  Widget _buildFileUploadButton() {
-    return Center(
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        onPressed: pickFile,
-        icon: Image.asset("assets/images/img18.png"),
-        label: const Text(
-          'إضافة مرفقات',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-    );
-  }
 
   String getFileIcon(String extension) {
     switch (extension.toLowerCase()) {
@@ -453,11 +440,11 @@ class _TranslationRequestPageState extends State<TranslationRequestPage> {
           ),
         ),
         onPressed: () async {
-          // if (isSubmitting) return;
-          // setState(() => isSubmitting = true);
-          // await submitTranslationRequest();
-          // setState(() => isSubmitting = false);
-Navigator.push(context,MaterialPageRoute(builder: (context)=>OrderDetailsPage()));
+          if (isSubmitting) return;
+          setState(() => isSubmitting = true);
+          await submitTranslationRequest();
+          setState(() => isSubmitting = false);
+//Navigator.push(context,MaterialPageRoute(builder: (context)=>OrderDetailsPage()));
         },
         child: isSubmitting
             ? const CircularProgressIndicator(color: Colors.white)

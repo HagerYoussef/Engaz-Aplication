@@ -16,7 +16,7 @@ class OtpService {
     }
 
     final url =
-        'https://b762efea-73b1-4221-8420-90b4e7d17125-00-2mjbzkqtyqqef.janeway.replit.dev/api/login-account/$userId/code';
+        'https://wckb4f4m-3000.euw.devtunnels.ms/api/login-account/$userId/code';
 
     final response = await http.post(
       Uri.parse(url),
@@ -26,5 +26,25 @@ class OtpService {
 
     final data = json.decode(response.body);
     return OtpResponse.fromJson(data);
+  }
+}
+class OtpResponse {
+  final bool success;
+  final String message;
+  final String token;
+
+  OtpResponse({
+    required this.success,
+    required this.message,
+    required this.token,
+  });
+
+  // Factory method to create OtpResponse from JSON
+  factory OtpResponse.fromJson(Map<String, dynamic> json) {
+    return OtpResponse(
+      success: json['success'] ?? false,
+      message: json['message'] ?? '',
+      token: json['token'] ?? '', // Ensure token is correctly parsed
+    );
   }
 }

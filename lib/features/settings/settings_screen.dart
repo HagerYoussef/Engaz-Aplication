@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../contact_us/contactus_screen.dart';
+import '../edit_profile/edit_profile_screen.dart';
+import '../general_settings/general_settings_screen.dart';
+import '../privacy_policy/privacy_policy_screen.dart';
+import '../saved_order/view/saved_order.dart';
+import '../terms_and_conditions/terms_and_conditions_screen.dart';
+import '../usage_policy/usage_polict_screen.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -28,31 +36,31 @@ class SettingsScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 buildSection([
                   buildSettingItem(context, "الملف الشخصي", Icons.person,
-                      "assets/images/img26.png", //EditProfileScreen()
+                      "assets/images/img26.png", EditProfileScreen()
                   ),
                   buildSettingItem(context, "عناويني", Icons.info,
-                      "assets/images/img27.png", //SavedAddress()
+                      "assets/images/img27.png", SavedAddress()
                   ),
                 ]),
                 const SizedBox(height: 12),
                 buildSection([
                   buildSettingItem(context, "إعدادات عامة", Icons.settings,
-                      "assets/images/img28.png", //GeneralSettingsScreen()
+                      "assets/images/img28.png", GeneralSettingsScreen()
                   ),
                   buildSettingItem(context, "تواصل معنا", Icons.phone,
-                      "assets/images/img29.png", //ContactUsScreen()
+                      "assets/images/img29.png", ContactUsScreen()
                   ),
                 ]),
                 const SizedBox(height: 12),
                 buildSection([
                   buildSettingItem(context, "سياسة الاستخدام", Icons.security,
-                      "assets/images/img30.png", //UsagePolicyScreen()
+                      "assets/images/img30.png", UsagePolicyScreen()
                   ),
                   buildSettingItem(context, "الشروط والأحكام", Icons.rule,
-                      "assets/images/img31.png", //TermsAndConditionsScreen()
+                      "assets/images/img31.png", TermsAndConditionsScreen()
                   ),
                   buildSettingItem(context, "سياسة الخصوصية", Icons.privacy_tip,
-                      "assets/images/img32.png", //PrivacyPolicyScreen()
+                      "assets/images/img32.png", PrivacyPolicyScreen()
                   ),
                 ]),
                 const SizedBox(height: 16),
@@ -109,7 +117,7 @@ class SettingsScreen extends StatelessWidget {
       String title,
       IconData icon,
       String imagePath,
-      //Widget targetScreen,
+      Widget targetScreen,
       ) {
     return ListTile(
       tileColor: Colors.white,
@@ -117,10 +125,10 @@ class SettingsScreen extends StatelessWidget {
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       trailing: const Icon(Icons.arrow_forward_ios),
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => targetScreen),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => targetScreen),
+        );
       },
     );
   }

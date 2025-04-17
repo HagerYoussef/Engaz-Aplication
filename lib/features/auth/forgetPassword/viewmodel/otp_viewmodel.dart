@@ -1,8 +1,9 @@
 import 'dart:async';
-
+import 'package:engaz_app/features/home_screen/view/home_view.dart';
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/otp_services.dart';
+
 enum OtpStatus {
   idle,
   loading,
@@ -21,6 +22,7 @@ class OtpViewModel extends ChangeNotifier {
   OtpStatus _status = OtpStatus.idle;
   String? _errorMessage;
   String _message = '';
+  List<String> otpValues = List.generate(4, (_) => '');
 
   OtpStatus get status => _status;
   String? get errorMessage => _errorMessage;
@@ -29,21 +31,36 @@ class OtpViewModel extends ChangeNotifier {
 
   final OtpService _otpService = OtpService();
 
+  // Function to verify the OTP
   Future<void> verifyOtp(BuildContext context) async {
-    if (code == null || code!.isEmpty) {
-      _setError("يرجى إدخال رمز التفعيل");
+    String otpCode = otpValues.join('');
+    print("codeotp: $otpCode");
+
+
+    if (otpCode.length != 4) {
+      print("يرجى إدخال رمز التفعيل");
       return;
     }
 
     _setStatus(OtpStatus.loading);
 
     try {
-      final response = await _otpService.verifyOtp( code: code!);
+      final response = await _otpService.verifyOtp(code: otpCode);
 
       if (response.success) {
         _message = "تم التحقق من رمز التفعيل بنجاح";
         _setStatus(OtpStatus.success);
-        Navigator.pushReplacementNamed(context, '/home');
+
+
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('token', response.token);
+        });
+
+      print('token${response.token}');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
       } else {
         _setError(response.message.isNotEmpty ? response.message : "رمز التفعيل غير صحيح أو منتهي");
       }
@@ -52,10 +69,12 @@ class OtpViewModel extends ChangeNotifier {
     }
   }
 
+
   void _setStatus(OtpStatus status) {
     _status = status;
     notifyListeners();
   }
+
 
   void _setError(String message) {
     _errorMessage = message;
@@ -63,6 +82,7 @@ class OtpViewModel extends ChangeNotifier {
     _setStatus(OtpStatus.failure);
     print("Error: $message");
   }
+
 
   void startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -77,6 +97,7 @@ class OtpViewModel extends ChangeNotifier {
       notifyListeners();
     });
   }
+
 
   void resetTimer() {
     _timer?.cancel();

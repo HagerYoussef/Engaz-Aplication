@@ -9,11 +9,13 @@ class OtpFields extends StatefulWidget {
 
 class _OtpFieldsState extends State<OtpFields> {
   late List<FocusNode> focusNodes;
+  late List<String> otpValues;
 
   @override
   void initState() {
     super.initState();
     focusNodes = List.generate(4, (_) => FocusNode());
+    otpValues = List.generate(4, (_) => '');
   }
 
   @override
@@ -40,11 +42,9 @@ class _OtpFieldsState extends State<OtpFields> {
           child: Theme(
             data: Theme.of(context).copyWith(
               textSelectionTheme: const TextSelectionThemeData(
-                cursorColor: Color.fromRGBO(64, 157, 220, 1), // لون المؤشر
-                selectionColor:
-                Color.fromRGBO(64, 157, 220, 1), // لون التحديد
-                selectionHandleColor: Color.fromRGBO(
-                    64, 157, 220, 1), // لون "اليد" أو مقبض التحديد
+                cursorColor: Color.fromRGBO(64, 157, 220, 1),
+                selectionColor: Color.fromRGBO(64, 157, 220, 1),
+                selectionHandleColor: Color.fromRGBO(64, 157, 220, 1),
               ),
             ),
             child: TextFormField(
@@ -56,10 +56,13 @@ class _OtpFieldsState extends State<OtpFields> {
               style: const TextStyle(fontSize: 24),
               cursorColor: Color.fromRGBO(64, 157, 220, 1),
               onChanged: (value) {
+                otpValues[index] = value;
+                print("otpValues$otpValues");
                 if (value.isNotEmpty && index < 3) {
                   FocusScope.of(context).requestFocus(focusNodes[index + 1]);
                 }
               },
+
               decoration: const InputDecoration(
                 counterText: "",
                 border: InputBorder.none,

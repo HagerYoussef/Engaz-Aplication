@@ -5,10 +5,12 @@ import 'package:geolocator/geolocator.dart';
 class DeliveryOptions extends StatefulWidget {
   final Function(String?)? onDeliveryMethodSelected;
   final Function(String?)? onAddressSelected;
+
   DeliveryOptions({
     required this.onDeliveryMethodSelected,
     required this.onAddressSelected,
   });
+
   @override
   _DeliveryOptionsState createState() => _DeliveryOptionsState();
 }
@@ -42,8 +44,8 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
     if (permission == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content:
-            Text("إذن الموقع مرفوض نهائيًا، قم بتفعيله من الإعدادات!")),
+          content: Text("إذن الموقع مرفوض نهائيًا، قم بتفعيله من الإعدادات!"),
+        ),
       );
       return;
     }
@@ -55,6 +57,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
 
       List<Placemark> placemarks =
       await placemarkFromCoordinates(position.latitude, position.longitude);
+
       String address =
           "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
 
@@ -62,22 +65,14 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
         _currentPosition = position;
         selectedAddress = address;
       });
+
+      // استدعاء الدالة عند تحديد العنوان
+      widget.onAddressSelected?.call(selectedAddress);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("تعذر تحديد الموقع، حاول مرة أخرى.")),
       );
     }
-  }
-
-  void _submitOrder() {
-    if (deliveryMethod == 'توصيل' && selectedAddress == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('الرجاء اختيار عنوان التوصيل')),
-      );
-      return;
-    }
-    String address = selectedAddress ?? "لم يتم تحديد الموقع بعد";
-    print("تم اختيار: $deliveryMethod، الموقع: $address");
   }
 
   @override
@@ -88,7 +83,7 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
         Row(
           children: [
             Radio(
-              value: 'استلام من الفرع',
+              value: 'Office',
               groupValue: deliveryMethod,
               activeColor: const Color(0xff409EDC),
               onChanged: (value) {
@@ -98,11 +93,13 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                   _currentPosition = null;
                   selectedAddress = null;
                 });
+                // استدعاء الدالة عند اختيار وسيلة التوصيل
+                widget.onDeliveryMethodSelected?.call(deliveryMethod);
               },
             ),
-            const Text('استلام من الشركة'),
+            const Text('Office'),
             Radio(
-              value: 'توصيل',
+              value: 'Home',
               groupValue: deliveryMethod,
               activeColor: const Color(0xff409EDC),
               onChanged: (value) {
@@ -112,129 +109,82 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
                   _currentPosition = null;
                   selectedAddress = null;
                 });
+                widget.onDeliveryMethodSelected?.call(deliveryMethod);
                 _getCurrentLocation();
               },
             ),
-            const Text('توصيل'),
+            const Text('Home'),
           ],
         ),
         const SizedBox(height: 8),
         if (deliveryMethod == "توصيل") ...[
-          Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: RadioListTile<String>(
-              activeColor: const Color(0xff409EDC),
-              contentPadding: EdgeInsets.zero,
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('المنزل',
-                      style: TextStyle(
-                          color: Color(0xff409EDC),
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold)),
-                  if (selectedOption == 'المنزل' && selectedAddress != null ||
-                      (selectedAddress != null && selectedOption == null))
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "الموقع :",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              selectedAddress ?? '',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-              value: 'المنزل',
-              groupValue: selectedOption,
-              onChanged: (value) {
-                setState(() {
-                  selectedOption = value;
-                });
-              },
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: RadioListTile<String>(
-              activeColor: const Color(0xff409EDC),
-              contentPadding: EdgeInsets.zero,
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('العمل',
-                      style: TextStyle(
-                          color: Color(0xff409EDC),
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold)),
-                  if (selectedOption == 'العمل' && selectedAddress != null ||
-                      (selectedAddress != null && selectedOption == null))
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "الموقع :",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              selectedAddress ?? '',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-              value: 'العمل',
-              groupValue: selectedOption,
-              onChanged: (value) {
-                setState(() {
-                  selectedOption = value;
-                });
-              },
-            ),
-          ),
+          _buildAddressOption("المنزل"),
+          _buildAddressOption("العمل"),
         ],
         const SizedBox(height: 10),
       ],
     );
   }
-}
 
+  Widget _buildAddressOption(String optionTitle) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: RadioListTile<String>(
+        activeColor: const Color(0xff409EDC),
+        contentPadding: EdgeInsets.zero,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              optionTitle,
+              style: const TextStyle(
+                color: Color(0xff409EDC),
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if ((selectedOption == optionTitle && selectedAddress != null) ||
+                (selectedAddress != null && selectedOption == null))
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "الموقع :",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        selectedAddress ?? '',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+        value: optionTitle,
+        groupValue: selectedOption,
+        onChanged: (value) {
+          setState(() {
+            selectedOption = value;
+          });
+        },
+      ),
+    );
+  }
+}
