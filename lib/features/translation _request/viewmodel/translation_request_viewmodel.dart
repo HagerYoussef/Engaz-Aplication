@@ -6,7 +6,7 @@ class ApiService {
 
   static Future<bool> submitTranslationRequest({
     required String fileLanguage,
-    required List<String> translationLanguages,
+    required String translationLanguage, // بدل ما تكون List
     required String notes,
     required String deliveryMethod,
     String? address,
@@ -18,11 +18,10 @@ class ApiService {
     try {
       var request = http.MultipartRequest('POST', uri);
 
-      // إعداد الهيدرات
-      request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
       request.headers['Accept'] = 'application/json';
 
-      // 1. تحويل fileLanguage
+      // تحويل اللغة المصدر
       final Map<String, String> languageMap = {
         'Arabic': 'Arabic',
         'English': 'English',
@@ -31,31 +30,17 @@ class ApiService {
         'Italian': 'Italian',
         'Japanese': 'Japanese',
       };
+
       request.fields['fileLanguage'] = languageMap[fileLanguage]!;
-
-      // 2. إرسال كل لغة كحقل منفصل ✅
-      for (var lang in translationLanguages) {
-        String? apiLang = languageMap[lang];
-        if (apiLang != null) {
-          request.files.add(
-            await http.MultipartFile.fromString(
-              'translationLanguages', // نفس الاسم لكل لغة
-              apiLang,
-            ),
-          );
-        }
-      }
-
-      // 3. تحويل deliveryMethod
+      request.fields['translationLanguages'] = 'Arabic';
+      request.fields['translationLanguages'] = 'Dutch';
+      request.fields['translationLanguages'] = 'French';
       request.fields['methodOfDelivery'] = _mapDeliveryMethod(deliveryMethod);
-
-      // 4. إضافة الملاحظات والعنوان
       request.fields['notes'] = notes.isNotEmpty ? notes : "";
       if (deliveryMethod == 'توصيل' && address != null) {
         request.fields['Address'] = address!;
       }
 
-      // 5. إضافة الملفات
       for (var file in files) {
         if (file.path != null) {
           request.files.add(
@@ -68,11 +53,6 @@ class ApiService {
         }
       }
 
-      // طباعة البيانات للإشكال
-      print("Request Fields: ${request.fields}");
-      print("Request Files: ${request.files.map((f) => '${f.field}: ${f.filename}').join(', ')}");
-
-      // إرسال الطلب
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
@@ -88,6 +68,7 @@ class ApiService {
       return false;
     }
   }
+
 
   static String _mapDeliveryMethod(String method) {
     switch (method) {
