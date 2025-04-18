@@ -16,9 +16,10 @@ class OrdersScreen extends StatefulWidget {
 
 class _OrdersScreenState extends State<OrdersScreen> {
   bool isTranslationSelected = true;
+  int _selectedTabIndex = 0;
 
   //late String userId;
-  late Future<List<dynamic>> _ordersFuture;
+   Future<List<dynamic>>? _ordersFuture;
 
   final Map<String, Map<String, dynamic>> statusDetails = {
     'Under Review': {
@@ -55,6 +56,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   void initState() {
     super.initState();
     _initializeData();
+
   }
 
   Future<void> _initializeData() async {
@@ -63,17 +65,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
       //userId = prefs.getString('id') ?? '';
     });
     _ordersFuture = _fetchOrders('جديد');
+
   }
 
   Future<List<dynamic>> _fetchOrders(String tabStatus) async {
-    final type = isTranslationSelected ? 'translation' : 'print';
+    final type = isTranslationSelected ? 'translation' : 'printing';
     final statusParam = _getApiStatusForTab(tabStatus);
 
     final token = await _getAuthToken();
 
     final response = await http.post(
       Uri.parse(
-          'https://wckb4f4m-3000.euw.devtunnels.ms/api/order/6abd1b36-1dd1-4609-a164-de89bc5af01d?type=translation&status=$statusParam'),
+          'https://wckb4f4m-3000.euw.devtunnels.ms/api/order/6abd1b36-1dd1-4609-a164-de89bc5af01d?type=$type&status=$statusParam'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization':
@@ -138,7 +141,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   width: 360,
                   height: 56,
                   margin:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF2F2F2),
                     borderRadius: BorderRadius.circular(16),
@@ -172,13 +175,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   ),
                 ),
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     color: const Color(0xffF2F2F2),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: TabBar(
+                    onTap: (index) {
+                      setState(() {
+                        _selectedTabIndex = index;
+                        _ordersFuture = _fetchOrders(_getTabStatus(index));
+                      });
+                    },
                     labelColor: Color(0xff409EDC),
                     unselectedLabelColor: Color(0xffB3B3B3),
                     indicatorColor: Colors.transparent,
@@ -223,94 +232,83 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   ),
                 ),
                 Expanded(
-                  child: TabBarView(
-                    children: [
-                      Translations.getText(
-                        'new',
-                        context
-                            .read<LocalizationProvider>()
-                            .locale
-                            .languageCode,
-                      ),
-                      Translations.getText(
-                        'current',
-                        context
-                            .read<LocalizationProvider>()
-                            .locale
-                            .languageCode,
-                      ),
-                      Translations.getText(
-                        'finish',
-                        context
-                            .read<LocalizationProvider>()
-                            .locale
-                            .languageCode,
-                      ),
-                      Translations.getText(
-                        'expire',
-                        context
-                            .read<LocalizationProvider>()
-                            .locale
-                            .languageCode,
-                      ),
-                    ].map((tabStatus) {
-                      return FutureBuilder<List<dynamic>>(
-                        future: _fetchOrders(tabStatus),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
-                          }
+                  child: FutureBuilder<List<dynamic>>(
+                    future: _ordersFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('حدث خطأ: ${snapshot.error}'));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Center(child: Text('لا يوجد طلبات'));
+                      }
 
-                          if (snapshot.hasError) {
-                            return Center(
+                      final orders = snapshot.data!;
+                      return
+
+
+
+                        ListView.builder(
+                        itemCount: orders.length,
+                        itemBuilder: (context, index) {
+                          final order = orders[index];
+                          return
+
+
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.error_outline,
-                                      color: Colors.red, size: 40),
-                                  SizedBox(height: 10),
-                                  Text('حدث خطأ في جلب البيانات'),
-                                ],
-                              ),
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+
+                                    Text(order['createdAt']??'',),
+                                    Text( '#'+ order['number'].toString()??'',style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize :20
+                                    ),),
+
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(  order['delivery']??'',),
+
+                                    Text( 'اللغه ${order['language']??''}'),
+
+
+                                  ],
+                                ),
+
+
+                                Row(mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(  order['filescount'].toString()??'',),
+
+                                    Text(":عدد المرفقات"),
+                                      ],
+                                ),
+
+
+                                Align(
+                                    alignment: Alignment.topRight,
+                                    child: Text( order['status']??'',)),
+
+
+
+
+
+                              ],
+                                                        ),
                             );
-                          }
-
-                          final orders = snapshot.data ?? [];
-
-                          if (orders.isEmpty) {
-                            return Center(child: Text('لا توجد طلبات متاحة'));
-                          }
-
-                          return ListView.builder(
-                            itemCount: orders.length,
-                            itemBuilder: (context, index) {
-                              final order = orders[index];
-                              final details = statusDetails[order['status']] ??
-                                  {
-                                    'text': order['status'],
-                                    'color': Colors.grey,
-                                    'image': 'assets/images/img16.png'
-                                  };
-
-                              return OrderItem(
-                                orderNumber: order['number'].toString(),
-                                createdAt: order['createdAt'],
-                                language: order['translationfrom'],
-                                filesCount: order['filescount'].toString(),
-                                statusText: details['text'],
-                                statusColor: details['color'],
-                                statusImage: details['image'],
-                                deliveryType: order['delivery'],
-                                orderId: order['id'].toString(),
-                              );
-                            },
-                          );
                         },
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
+
               ],
             ),
           ),
@@ -318,6 +316,22 @@ class _OrdersScreenState extends State<OrdersScreen> {
       );
     });
   }
+
+  String _getTabStatus(int index) {
+    switch (index) {
+      case 0:
+        return 'جديد';
+      case 1:
+        return 'حالي';
+      case 2:
+        return 'منتهي';
+      case 3:
+        return 'ملغي';
+      default:
+        return 'جديد';
+    }
+  }
+
 }
 
 Widget _buildTabButton(String text, bool isSelected) {
