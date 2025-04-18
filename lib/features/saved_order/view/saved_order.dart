@@ -280,6 +280,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../address/view/address.dart';
 import '../../address/view/edit_address.dart';
 import '../../address/view_model/add_address_view_model.dart';
+import '../../localization/change_lang.dart';
 
 class SavedAddress extends StatefulWidget {
   const SavedAddress({Key? key}) : super(key: key);
@@ -359,13 +360,25 @@ class _SavedAddressState extends State<SavedAddress> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
+    return Consumer<LocalizationProvider>(
+        builder: (context, localizationProvider, child) {
+          final locale = localizationProvider.locale.languageCode;
+          final textDirection =
+          locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
+
+          return Directionality(
+            textDirection: textDirection,
       child: Scaffold(
         backgroundColor: const Color(0xffF8F8F8),
         appBar: AppBar(
           leading: const Icon(Icons.arrow_back_ios),
-          title: const Text('العناوين المحفوظه',
+          title:  Text(Translations.getText(
+            'saved_address',
+            context
+                .read<LocalizationProvider>()
+                .locale
+                .languageCode,
+          ),
               style: TextStyle(color: Colors.black)),
           backgroundColor: const Color(0xffF8F8F8),
           elevation: 0,
@@ -383,9 +396,15 @@ class _SavedAddressState extends State<SavedAddress> {
                         child: Image.asset('assets/images/img52.png',
                             height: 100)),
                     const SizedBox(height: 20),
-                    const Center(
+                     Center(
                       child: Text(
-                        "اختر احد العناوين المحفوظه الخاصه بك",
+                          Translations.getText(
+                            'choose',
+                            context
+                                .read<LocalizationProvider>()
+                                .locale
+                                .languageCode,
+                          ),
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -417,7 +436,7 @@ class _SavedAddressState extends State<SavedAddress> {
       ),
     );
   }
-
+    );}
   Widget _buildAddressCard(String title, String address) {
     bool isSelected = selectedAddress == title;
 
@@ -474,7 +493,7 @@ class _SavedAddressState extends State<SavedAddress> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "الموقع :", // Changed from "الموقع" to "العنوان"
+                    "الموقع :",
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 12,
@@ -517,8 +536,14 @@ class _SavedAddressState extends State<SavedAddress> {
             SnackBar(content: Text('تم اختيار التوصيل إلى $selectedAddress')),
           );
         },
-        child: const Text(
-          'التوصيل إلى هذا العنوان',
+        child:  Text(
+            Translations.getText(
+              'dilvery',
+              context
+                  .read<LocalizationProvider>()
+                  .locale
+                  .languageCode,
+            ),
           style: TextStyle(fontSize: 16),
         ),
       ),
@@ -541,7 +566,13 @@ class _SavedAddressState extends State<SavedAddress> {
               MaterialPageRoute(
                   builder: (context) =>  AddAddressScreen()));
         },
-        child: const Text('اضافه عنوان جديد',
+        child:  Text(Translations.getText(
+          'add_to_address',
+          context
+              .read<LocalizationProvider>()
+              .locale
+              .languageCode,
+        ),
             style: TextStyle(color: Colors.white, fontSize: 16)),
       ),
     );

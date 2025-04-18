@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../localization/change_lang.dart';
 import '../../printing_request/view/printer_request_page.dart';
+import '../../printing_with_api/print.dart';
 import '../../translation _request/view/translation_request_page.dart';
 
 class ContentViewModel extends ChangeNotifier {
@@ -11,20 +14,24 @@ class ContentViewModel extends ChangeNotifier {
     'assets/images/img7.png',
   ];
 
-  final List<Map<String, dynamic>> categories = [
-    {
-      'title': 'الترجمة',
-      'description': 'نقدم أفضل خدمات الترجمة لأكثر من 10 لغات حول العالم',
-      'image': 'assets/images/img5.png',
-      'page': TranslationRequestPage(),
-    },
-    {
-      'title': 'الطباعة',
-      'description': 'نقدم أفضل جودة للطباعة بأسعار تنافسية',
-      'image': 'assets/images/img6.png',
-      'page': PrinterRequestPage(),
-    },
-  ];
+  List<Map<String, dynamic>> getCategories(BuildContext context) {
+    final localeCode = context.read<LocalizationProvider>().locale.languageCode;
+
+    return [
+      {
+        'title': Translations.getText('tran', localeCode),
+        'description': Translations.getText('offerr', localeCode),
+        'image': 'assets/images/img5.png',
+        'page': TranslationRequestPage(),
+      },
+      {
+        'title': 'الطباعة',
+        'description': Translations.getText('oferrr2', localeCode),
+        'image': 'assets/images/img6.png',
+        'page': PrinterRequestPageWithApi(),
+      },
+    ];
+  }
 
   @override
   void dispose() {

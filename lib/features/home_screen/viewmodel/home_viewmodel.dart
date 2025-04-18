@@ -1,4 +1,6 @@
+import 'package:engaz_app/features/orders/orders_screen.dart';
 import 'package:flutter/material.dart';
+import '../../settings/settings_screen.dart';
 import '../view/home_content.dart';
 
 class HomeViewModel extends ChangeNotifier {
@@ -6,8 +8,9 @@ class HomeViewModel extends ChangeNotifier {
 
   final List<Widget> pages = [
     const HomeContent(),
-    const Placeholder(fallbackHeight: 200), // OrdersScreen(),
-    const Placeholder(fallbackHeight: 200), // SettingsScreen(),
+    OrdersScreen(),
+    const SettingsScreen(), // OrdersScreen(),
+      // SettingsScreen(),
   ];
 
   void changeTab(int index) {

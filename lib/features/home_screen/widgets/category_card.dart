@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../localization/change_lang.dart';
 
 class CategoryCard extends StatelessWidget {
   final String title;
@@ -66,8 +69,11 @@ class CategoryCard extends StatelessWidget {
                               color: Color(0xff409EDC), width: 1),
                         ),
                       ),
-                      child: const Text(
-                        'طلب الخدمة',
+                      child:  Text(
+                          Translations.getText(
+                            'req2',
+                            context.read<LocalizationProvider>().locale.languageCode,
+                          ),
                         style: TextStyle(
                             color: Color(0xff0409EDC),
                             fontWeight: FontWeight.bold),

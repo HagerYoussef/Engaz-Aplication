@@ -6,172 +6,223 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../auth/forgetPassword/view/otp_screen.dart';
 import '../auth/login/viewmodel/login_viewmodel.dart';
+import '../localization/change_lang.dart';
 
 class ChangeEmailScreen extends StatelessWidget {
   const ChangeEmailScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => LoginViewModel(),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            double screenWidth = constraints.maxWidth;
-            double padding = screenWidth > 600 ? 48 : 24;
-            double imageWidth = screenWidth > 600 ? 250 : 204;
-            double buttonHeight = screenWidth > 600 ? 60 : 50;
+    return Consumer<LocalizationProvider>(
+        builder: (context, localizationProvider, child) {
+      final locale = localizationProvider.locale.languageCode;
+      final textDirection =
+          locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
 
-            return Stack(
-              children: [
-                SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(height: screenWidth > 600 ? 70 : 50),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            const Text(
-                              "تغيير البريد الالكتروني ",
-                              style: TextStyle(
-                                color: Color(0xff1D1D1D),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                                fontFamily: 'IBM_Plex_Sans_Arabic',
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Icon(Icons.arrow_forward_ios),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: screenWidth > 600 ? 50 : 30),
-                        Image.asset('assets/images/img1.png',
-                            width: imageWidth, height: imageWidth * 0.37),
-                        const SizedBox(height: 16),
-                        const Text(
-                          "البريد الالكتروني الجديد",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
-                        ),
-                        const Text(
-                          "الرجاء ادخال البريد الالكتروني الجديد لاستقبال رمز التفعيل",
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xffB3B3B3),
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
-                        ),
-                        const SizedBox(height: 16),
-                        const CustomTextFeild2(),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          height: buttonHeight,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              final viewModel = Provider.of<LoginViewModel>(context, listen: false);
-                              final email = viewModel.userInput;
+      return Directionality(
+          textDirection: textDirection,
+          child: ChangeNotifierProvider(
+            create: (context) => LoginViewModel(),
+            child: Scaffold(
+              backgroundColor: Colors.white,
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  double screenWidth = constraints.maxWidth;
+                  double padding = screenWidth > 600 ? 48 : 24;
+                  double imageWidth = screenWidth > 600 ? 250 : 204;
+                  double buttonHeight = screenWidth > 600 ? 60 : 50;
 
-                              if (email.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "يرجى إدخال البريد الإلكتروني",
-                                      style: TextStyle(fontFamily: 'IBM_Plex_Sans_Arabic'),
+                  return Stack(
+                    children: [
+                      SingleChildScrollView(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: padding),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(height: screenWidth > 600 ? 70 : 50),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    Translations.getText(
+                                      'change2',
+                                      context
+                                          .read<LocalizationProvider>()
+                                          .locale
+                                          .languageCode,
                                     ),
-                                    backgroundColor: Colors.red,
+                                    style: TextStyle(
+                                      color: Color(0xff1D1D1D),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18,
+                                      fontFamily: 'IBM_Plex_Sans_Arabic',
+                                    ),
                                   ),
-                                );
-                                return;
-                              }
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Icon(Icons.arrow_forward_ios),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: screenWidth > 600 ? 50 : 30),
+                              Image.asset('assets/images/img1.png',
+                                  width: imageWidth, height: imageWidth * 0.37),
+                              const SizedBox(height: 16),
+                              Text(
+                                Translations.getText(
+                                  'new_email',
+                                  context
+                                      .read<LocalizationProvider>()
+                                      .locale
+                                      .languageCode,
+                                ),
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'IBM_Plex_Sans_Arabic'),
+                              ),
+                              Text(
+                                Translations.getText(
+                                  'pls2',
+                                  context
+                                      .read<LocalizationProvider>()
+                                      .locale
+                                      .languageCode,
+                                ),
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xffB3B3B3),
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'IBM_Plex_Sans_Arabic'),
+                              ),
+                              const SizedBox(height: 16),
+                              const CustomTextFeild2(),
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                height: buttonHeight,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final viewModel =
+                                        Provider.of<LoginViewModel>(context,
+                                            listen: false);
+                                    final email = viewModel.userInput;
 
-                              try {
-                                final prefs = await SharedPreferences.getInstance();
-                                // final token = prefs.getString('authToken') ?? '';
-                                // final userId = JwtDecoder.decode(token)['user_id'];
-                                final token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
-                                final userId = '6abd1b36-1dd1-4609-a164-de89bc5af01d';
+                                    if (email.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "يرجى إدخال البريد الإلكتروني",
+                                            style: TextStyle(
+                                                fontFamily:
+                                                    'IBM_Plex_Sans_Arabic'),
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                      return;
+                                    }
 
-                                final response = await http.post(
-                                  Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/user/$userId/chgnageemail/request'),
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': 'Bearer $token',
+                                    try {
+                                      final prefs =
+                                          await SharedPreferences.getInstance();
+                                      // final token = prefs.getString('authToken') ?? '';
+                                      // final userId = JwtDecoder.decode(token)['user_id'];
+                                      final token =
+                                          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
+                                      final userId =
+                                          '6abd1b36-1dd1-4609-a164-de89bc5af01d';
+
+                                      final response = await http.post(
+                                        Uri.parse(
+                                            'https://wckb4f4m-3000.euw.devtunnels.ms/api/user/$userId/chgnageemail/request'),
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                          'Authorization': 'Bearer $token',
+                                        },
+                                        body: jsonEncode({"email": email}),
+                                      );
+
+                                      final data = jsonDecode(response.body);
+
+                                      if (response.statusCode == 200) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => OtpScreen(
+                                              contactInfo: email,
+                                              contactType: 'email',
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              data['message'] ??
+                                                  'حدث خطأ غير متوقع',
+                                              style: const TextStyle(
+                                                  fontFamily:
+                                                      'IBM_Plex_Sans_Arabic'),
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'فشل الاتصال بالخادم: $e',
+                                            style: const TextStyle(
+                                                fontFamily:
+                                                    'IBM_Plex_Sans_Arabic'),
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   },
-                                  body: jsonEncode({"email": email}),
-                                );
-
-                                final data = jsonDecode(response.body);
-
-                                if (response.statusCode == 200) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => OtpScreen(
-                                        contactInfo: email,
-                                        contactType: 'email',
-                                      ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        data['message'] ?? 'حدث خطأ غير متوقع',
-                                        style: const TextStyle(fontFamily: 'IBM_Plex_Sans_Arabic'),
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'فشل الاتصال بالخادم: $e',
-                                      style: const TextStyle(fontFamily: 'IBM_Plex_Sans_Arabic'),
-                                    ),
-                                    backgroundColor: Colors.red,
                                   ),
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                  child: Text(
+                                    Translations.getText(
+                                      'sure',
+                                      context
+                                          .read<LocalizationProvider>()
+                                          .locale
+                                          .languageCode,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'IBM_Plex_Sans_Arabic',
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: const Text(
-                              "تأكيد",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'IBM_Plex_Sans_Arabic',
-                                color: Colors.white,
-                              ),
-                            ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ));
+    });
   }
 }
 
@@ -228,7 +279,8 @@ class _CustomTextFeild2State extends State<CustomTextFeild2> {
             borderSide: BorderSide.none,
             borderRadius: BorderRadius.circular(16),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         ),
         keyboardType: TextInputType.emailAddress,
       ),
