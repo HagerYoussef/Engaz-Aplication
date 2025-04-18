@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
 
       ],
-      home:  OrderDetailsPage(),
+      home:  HomePage(),
     );
   }
 }
