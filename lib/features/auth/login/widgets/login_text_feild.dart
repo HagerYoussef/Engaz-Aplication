@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../localization/change_lang.dart';
 import '../viewmodel/login_viewmodel.dart';
 
 class LoginTextField extends StatefulWidget {
@@ -65,8 +66,20 @@ class _LoginTextFieldState extends State<LoginTextField> {
                 },
                 decoration: InputDecoration(
                   hintText: viewModel.isPhoneSelected
-                      ? "ادخل رقم الجوال"
-                      : "ادخل البريد الإلكتروني",
+                      ?  Translations.getText(
+                    'enter2',
+                    context
+                        .read<LocalizationProvider>()
+                        .locale
+                        .languageCode,
+                  )
+                    : Translations.getText(
+                    'enter3',
+                    context
+                        .read<LocalizationProvider>()
+                        .locale
+                        .languageCode,
+                  ),
                   hintStyle: const TextStyle(
                     color: Color(0xffB3B3B3),
                     fontWeight: FontWeight.w500,

@@ -72,7 +72,7 @@ class AddAddressViewModel extends ChangeNotifier {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = json.decode(response.body);
         final SharedPreferences prefs = await SharedPreferences.getInstance();
-       // await prefs.setString('address_id', responseBody['data']['id']);
+        await prefs.setString('address_id', responseBody['data']['id']);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("تمت الإضافة بنجاح ✅")),
@@ -165,8 +165,8 @@ class AddAddressViewModel extends ChangeNotifier {
     notifyListeners();
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    //String? addressId = prefs.getString('address_id');
-    String? addressId = '84c59d7c-5d8a-43fc-a954-783db97733a3';
+    String? addressId = prefs.getString('address_id');
+   // String? addressId = '3772252d-57cd-404a-9411-e07da54deeca';
 
     if (addressId == null) {
       ScaffoldMessenger.of(context).showSnackBar(

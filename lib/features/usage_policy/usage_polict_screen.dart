@@ -1,17 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+
+import '../localization/change_lang.dart';
 
 class UsagePolicyScreen extends StatelessWidget {
   const UsagePolicyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
+    return Consumer<LocalizationProvider>(
+        builder: (context, localizationProvider, child) {
+      final locale = localizationProvider.locale.languageCode;
+      final textDirection =
+      locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
+
+      return Directionality(
+        textDirection: textDirection,
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: const Text('سياسه الاستخدام'),
+          title:  Text(Translations.getText(
+        'use',
+        context
+        .read<LocalizationProvider>()
+        .locale
+        .languageCode,
+    )),
           leading: const Icon(Icons.arrow_back_ios),
         ),
         body: Padding(
@@ -55,5 +71,5 @@ class UsagePolicyScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-}
+  });
+}}

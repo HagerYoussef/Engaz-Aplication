@@ -32,9 +32,9 @@ class ApiService {
       };
 
       request.fields['fileLanguage'] = languageMap[fileLanguage]!;
-      request.fields['translationLanguages'] = 'Arabic';
-      request.fields['translationLanguages'] = 'Dutch';
-      request.fields['translationLanguages'] = 'French';
+      request.fields['translationLanguages[]'] = 'Arabic';
+      request.fields['translationLanguages[]'] = 'Dutch';
+      request.fields['translationLanguages[]'] = 'French';
       request.fields['methodOfDelivery'] = _mapDeliveryMethod(deliveryMethod);
       request.fields['notes'] = notes.isNotEmpty ? notes : "";
       if (deliveryMethod == 'توصيل' && address != null) {

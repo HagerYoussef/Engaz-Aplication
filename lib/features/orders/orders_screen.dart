@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
+import '../localization/change_lang.dart';
 
 class OrdersScreen extends StatefulWidget {
   @override
@@ -14,6 +16,7 @@ class OrdersScreen extends StatefulWidget {
 
 class _OrdersScreenState extends State<OrdersScreen> {
   bool isTranslationSelected = true;
+
   //late String userId;
   late Future<List<dynamic>> _ordersFuture;
 
@@ -66,15 +69,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final type = isTranslationSelected ? 'translation' : 'print';
     final statusParam = _getApiStatusForTab(tabStatus);
 
-
     final token = await _getAuthToken();
 
     final response = await http.post(
-
-      Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/6abd1b36-1dd1-4609-a164-de89bc5af01d?type=translation&status=$statusParam'),
+      Uri.parse(
+          'https://wckb4f4m-3000.euw.devtunnels.ms/api/order/6abd1b36-1dd1-4609-a164-de89bc5af01d?type=translation&status=$statusParam'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',  // استخدم التوكن هنا بشكل ديناميكي
+        'Authorization':
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',
+
       },
       body: jsonEncode({
         'type': type,
@@ -90,7 +94,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Future<String> _getAuthToken() async {
-
     return 'token';
   }
 
@@ -101,153 +104,237 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: DefaultTabController(
-        length: 4,
-        child: Scaffold(
-          backgroundColor: const Color(0xffFAFAFA),
-          appBar: AppBar(
-            leading: Icon(Icons.arrow_back_ios_new),
+    return Consumer<LocalizationProvider>(
+        builder: (context, localizationProvider, child) {
+      final locale = localizationProvider.locale.languageCode;
+      final textDirection =
+          locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
+
+      return Directionality(
+        textDirection: textDirection,
+        child: DefaultTabController(
+          length: 4,
+          child: Scaffold(
             backgroundColor: const Color(0xffFAFAFA),
-            title: const Text('طلباتي', style: TextStyle(color: Colors.black)),
-            elevation: 0,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset("assets/images/img9.png"),
-              )
-            ],
-          ),
-          body: Column(
-            children: [
-              Container(
-                width: 360,
-                height: 56,
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F2F2),
-                  borderRadius: BorderRadius.circular(16),
+            appBar: AppBar(
+              leading: Icon(Icons.arrow_back_ios_new),
+              backgroundColor: const Color(0xffFAFAFA),
+              title:
+                   Text( Translations.getText(
+                    'ord',
+                    context.read<LocalizationProvider>().locale.languageCode,
+                  ), style: TextStyle(color: Colors.black)),
+              elevation: 0,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset("assets/images/img9.png"),
+                )
+              ],
+            ),
+            body: Column(
+              children: [
+                Container(
+                  width: 360,
+                  height: 56,
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF2F2F2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      GestureDetector(
+                        onTap: () => setState(() {
+                          isTranslationSelected = true;
+                          _ordersFuture = _fetchOrders('جديد');
+                        }),
+                        child: _buildTabButton(
+                        Translations.getText(
+                            'tranorder',
+                            context.read<LocalizationProvider>().locale.languageCode,
+                          ), isTranslationSelected),
+                      ),
+                      GestureDetector(
+                        onTap: () => setState(() {
+                          isTranslationSelected = false;
+                          _ordersFuture = _fetchOrders('جديد');
+                        }),
+                        child: _buildTabButton(
+                            Translations.getText(
+                              'tranorder2',
+                              context.read<LocalizationProvider>().locale.languageCode,
+                            ), !isTranslationSelected),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    GestureDetector(
-                      onTap: () => setState(() {
-                        isTranslationSelected = true;
-                        _ordersFuture = _fetchOrders('جديد');
-                      }),
-                      child: _buildTabButton('طلبات الترجمة', isTranslationSelected),
-                    ),
-                    GestureDetector(
-                      onTap: () => setState(() {
-                        isTranslationSelected = false;
-                        _ordersFuture = _fetchOrders('جديد');
-                      }),
-                      child: _buildTabButton('طلبات الطباعة', !isTranslationSelected),
-                    ),
-                  ],
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffF2F2F2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: TabBar(
+                    labelColor: Color(0xff409EDC),
+                    unselectedLabelColor: Color(0xffB3B3B3),
+                    indicatorColor: Colors.transparent,
+                    tabs: [
+                      Tab(
+                        text: Translations.getText(
+                          'new',
+                          context
+                              .read<LocalizationProvider>()
+                              .locale
+                              .languageCode,
+                        ),
+                      ),
+                      Tab(
+                        text: Translations.getText(
+                          'current',
+                          context
+                              .read<LocalizationProvider>()
+                              .locale
+                              .languageCode,
+                        ),
+                      ),
+                      Tab(
+                        text: Translations.getText(
+                          'finish',
+                          context
+                              .read<LocalizationProvider>()
+                              .locale
+                              .languageCode,
+                        ),
+                      ),
+                      Tab(
+                        text: Translations.getText(
+                          'expire',
+                          context
+                              .read<LocalizationProvider>()
+                              .locale
+                              .languageCode,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xffF2F2F2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const TabBar(
-                  labelColor: Color(0xff409EDC),
-                  unselectedLabelColor: Color(0xffB3B3B3),
-                  indicatorColor: Colors.transparent,
-                  tabs: [
-                    Tab(text: 'جديد'),
-                    Tab(text: 'حالي'),
-                    Tab(text: 'منتهي'),
-                    Tab(text: 'ملغي'),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: TabBarView(
-                  children: ['جديد', 'حالي', 'منتهي', 'ملغي'].map((tabStatus) {
-                    return FutureBuilder<List<dynamic>>(
-                      future: _fetchOrders(tabStatus),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        }
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      Translations.getText(
+                        'new',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      Translations.getText(
+                        'current',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      Translations.getText(
+                        'finish',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      Translations.getText(
+                        'expire',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                    ].map((tabStatus) {
+                      return FutureBuilder<List<dynamic>>(
+                        future: _fetchOrders(tabStatus),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
 
-                        if (snapshot.hasError) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.error_outline, color: Colors.red, size: 40),
-                                SizedBox(height: 10),
-                                Text('حدث خطأ في جلب البيانات'),
-                              ],
-                            ),
-                          );
-                        }
-
-                        final orders = snapshot.data ?? [];
-
-                        if (orders.isEmpty) {
-                          return Center(child: Text('لا توجد طلبات متاحة'));
-                        }
-
-                        return ListView.builder(
-                          itemCount: orders.length,
-                          itemBuilder: (context, index) {
-                            final order = orders[index];
-                            final details = statusDetails[order['status']] ?? {
-                              'text': order['status'],
-                              'color': Colors.grey,
-                              'image': 'assets/images/img16.png'
-                            };
-
-                            return OrderItem(
-                              orderNumber: order['number'].toString(),
-                              createdAt: order['createdAt'],
-                              language: order['translationfrom'],
-                              filesCount: order['filescount'].toString(),
-                              statusText: details['text'],
-                              statusColor: details['color'],
-                              statusImage: details['image'],
-                              deliveryType: order['delivery'],
-                              orderId: order['id'].toString(),
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.error_outline,
+                                      color: Colors.red, size: 40),
+                                  SizedBox(height: 10),
+                                  Text('حدث خطأ في جلب البيانات'),
+                                ],
+                              ),
                             );
-                          },
-                        );
-                      },
-                    );
-                  }).toList(),
+                          }
+
+                          final orders = snapshot.data ?? [];
+
+                          if (orders.isEmpty) {
+                            return Center(child: Text('لا توجد طلبات متاحة'));
+                          }
+
+                          return ListView.builder(
+                            itemCount: orders.length,
+                            itemBuilder: (context, index) {
+                              final order = orders[index];
+                              final details = statusDetails[order['status']] ??
+                                  {
+                                    'text': order['status'],
+                                    'color': Colors.grey,
+                                    'image': 'assets/images/img16.png'
+                                  };
+
+                              return OrderItem(
+                                orderNumber: order['number'].toString(),
+                                createdAt: order['createdAt'],
+                                language: order['translationfrom'],
+                                filesCount: order['filescount'].toString(),
+                                statusText: details['text'],
+                                statusColor: details['color'],
+                                statusImage: details['image'],
+                                deliveryType: order['delivery'],
+                                orderId: order['id'].toString(),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
+}
 
-  Widget _buildTabButton(String text, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xff409EDC) : Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+Widget _buildTabButton(String text, bool isSelected) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+    decoration: BoxDecoration(
+      color: isSelected ? const Color(0xff409EDC) : Colors.transparent,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Text(
+      text,
+      style: TextStyle(
+        color: isSelected ? Colors.white : Colors.black,
+        fontWeight: FontWeight.bold,
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isSelected ? Colors.white : Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
+    ),
+  );
 }
 
 class OrderItem extends StatelessWidget {
@@ -331,36 +418,36 @@ class OrderItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('#$orderNumber',
-                  style: const TextStyle(
-                      color: Color(0xff1D1D1D),
-                      fontWeight: FontWeight.bold)),
-              Text(createdAt,
-                  style: const TextStyle(color: Colors.grey)),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('اللغه:',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff1D1D1D))),
-                  const SizedBox(width: 5),
-                  Text(language,
+                  Text('#$orderNumber',
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.blue)),
+                          color: Color(0xff1D1D1D),
+                          fontWeight: FontWeight.bold)),
+                  Text(createdAt, style: const TextStyle(color: Colors.grey)),
                 ],
               ),
-              Text(_mapDelivery(deliveryType),
-              )  ],
-
+              const SizedBox(height: 5),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Text('اللغه:',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xff1D1D1D))),
+                      const SizedBox(width: 5),
+                      Text(language,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.blue)),
+                    ],
+                  ),
+                  Text(
+                    _mapDelivery(deliveryType),
+                  )
+                ],
               ),
               const SizedBox(height: 5),
               Row(

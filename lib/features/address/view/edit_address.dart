@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:geocoding/geocoding.dart';
 
+import '../../localization/change_lang.dart';
 import '../view_model/add_address_view_model.dart';
 
 
@@ -26,13 +27,25 @@ class EditAddressScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AddAddressViewModel(),
-      child: Directionality(
-        textDirection: TextDirection.rtl,
+        child: Consumer<LocalizationProvider>(
+    builder: (context, localizationProvider, child) {
+      final locale = localizationProvider.locale.languageCode;
+      final textDirection =
+      locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
+
+      return Directionality(
+        textDirection: textDirection,
         child: Scaffold(
           appBar: AppBar(
             leading: const Icon(Icons.arrow_back_ios),
-            title: const Text(
-              "تعديل العنوان",
+            title: Text(
+              Translations.getText(
+                'editadd',
+                context
+                    .read<LocalizationProvider>()
+                    .locale
+                    .languageCode,
+              ),
               style: TextStyle(color: Colors.black),
             ),
             backgroundColor: Colors.white,
@@ -90,8 +103,14 @@ class EditAddressScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "اسم الموقع",
+                          Text(
+                            Translations.getText(
+                              'locname',
+                              context
+                                  .read<LocalizationProvider>()
+                                  .locale
+                                  .languageCode,
+                            ),
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
@@ -122,16 +141,38 @@ class EditAddressScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text(
-                                  "الموقع: ${model.locationController.text}",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black54,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      Translations.getText(
+                                        'locname',
+                                        context
+                                            .read<LocalizationProvider>()
+                                            .locale
+                                            .languageCode,
+                                      ),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(width: 5),
+                                    // مسافة بسيطة بين الترجمة والنص
+                                    Expanded(
+                                      child: Text(
+                                        model.locationController.text,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                        softWrap: true,
+                                        maxLines: null, // يسمح للنص يلف
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -143,7 +184,8 @@ class EditAddressScreen extends StatelessWidget {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 14),
                               ),
                               onPressed: model.isLoading
                                   ? null
@@ -151,10 +193,18 @@ class EditAddressScreen extends StatelessWidget {
                                 model.updateAddress(context);
                               },
                               child: model.isLoading
-                                  ? const CircularProgressIndicator(color: Colors.white)
-                                  : const Text(
-                                "حفظ التعديلات",
-                                style: TextStyle(color: Colors.white, fontSize: 16),
+                                  ? const CircularProgressIndicator(
+                                  color: Colors.white)
+                                  : Text(
+                                Translations.getText(
+                                  'savee',
+                                  context
+                                      .read<LocalizationProvider>()
+                                      .locale
+                                      .languageCode,
+                                ),
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
                               ),
                             ),
                           ),
@@ -167,7 +217,7 @@ class EditAddressScreen extends StatelessWidget {
             },
           ),
         ),
-      ),
-    );
+      );
+    }) );
   }
 }

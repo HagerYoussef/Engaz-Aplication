@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:open_file/open_file.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth/register/widgets/custom_text_feild.dart';
+import '../localization/change_lang.dart';
 import '../order_details/order_details_page.dart';
 import '../printing_request/widgets/upload_button.dart';
 import '../saved_order/view/saved_order.dart';
@@ -17,14 +20,14 @@ import 'package:http/http.dart' as http;
 import 'package:open_file/open_file.dart';
 import 'dart:io';
 
-class PrinterRequestPage extends StatefulWidget {
-  const PrinterRequestPage({super.key});
+class PrinterRequestPageWithApi extends StatefulWidget {
+  const PrinterRequestPageWithApi({super.key});
 
   @override
   _PrinterRequestPageState createState() => _PrinterRequestPageState();
 }
 
-class _PrinterRequestPageState extends State<PrinterRequestPage> {
+class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
   final List<PlatformFile> selectedFiles = [];
   final List<String> availableLanguages = ['White and Black'];
   final List<String> availableLanguages2 = [
@@ -39,6 +42,10 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
   final TextEditingController _pagesController = TextEditingController();
   final TextEditingController _copiesController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+  TextDirection getTextDirection(BuildContext context) {
+    String languageCode = context.read<LocalizationProvider>().locale.languageCode;
+    return languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr;
+  }
 
   Future<void> pickFile() async {
     try {
@@ -249,7 +256,7 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
               onChanged: onChanged,
-              hint: Text('اختر $label'),
+              hint: Text('$label'),
             ),
           ),
         ),
@@ -259,154 +266,236 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: const Color(0xffF8F8F8),
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: const Text('طلب طباعه', style: TextStyle(color: Colors.black)),
+    return Consumer<LocalizationProvider>(
+        builder: (context, localizationProvider, child) {
+      final locale = localizationProvider.locale.languageCode;
+      final textDirection =
+          locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
+
+      return Directionality(
+        textDirection: textDirection,
+        child: Scaffold(
           backgroundColor: const Color(0xffF8F8F8),
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Image.asset('assets/images/img56.png', height: 100),
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+                Translations.getText(
+                  'tranorder3',
+                  context.read<LocalizationProvider>().locale.languageCode,
                 ),
-                const SizedBox(height: 16),
-                const Center(
-                  child: Text('طلب طباعه جديد',
+                style: TextStyle(color: Colors.black)),
+            backgroundColor: const Color(0xffF8F8F8),
+            elevation: 0,
+            iconTheme: const IconThemeData(color: Colors.black),
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Image.asset('assets/images/img56.png', height: 100),
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Text(
+                        Translations.getText(
+                          'nn',
+                          context
+                              .read<LocalizationProvider>()
+                              .locale
+                              .languageCode,
+                        ),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 4),
+                  Center(
+                    child: Text(
+                      Translations.getText(
+                        'please',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      style: TextStyle(fontSize: 14, color: Color(0xffB3B3B3)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                      Translations.getText(
+                        'att',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 4),
-                const Center(
-                  child: Text(
-                    'الرجاء ارفاق الملفات المراد طباعتها',
-                    style: TextStyle(fontSize: 14, color: Color(0xffB3B3B3)),
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  UploadButton(
+                    onPressed: () {
+                      pickFile();
+                    },
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text('المرفقات المراد طباعتها',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                UploadButton(
-                  onPressed: () {
-                    pickFile();
-                  },
-                ),
-                const SizedBox(height: 8),
-                _buildSelectedFilesList(),
-                const SizedBox(height: 16),
-                _buildDropdown(
-                    'اختر لون الطباعة', availableLanguages, selectedLanguage,
-                    (value) {
-                  setState(() => selectedLanguage = value);
-                }),
-                _buildDropdown(
-                    'اختر نوع التغليف', availableLanguages2, selectedLanguage2,
-                    (value) {
-                  setState(() => selectedLanguage2 = value);
-                }),
-                const SizedBox(height: 16),
-                const Text('عدد الصفحات',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                TextField(
-                  controller: _pagesController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => setState(() {}),
-                  decoration: InputDecoration(
-                    hintText: 'عدد الصفحات المراد طباعتها',
-                    filled: true,
-                    fillColor: const Color(0xffF2F2F2),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text('عدد النسخ',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                TextField(
-                  controller: _copiesController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => setState(() {}),
-                  decoration: InputDecoration(
-                    hintText: 'عدد النسخ المراد طباعتها',
-                    filled: true,
-                    fillColor: const Color(0xffF2F2F2),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 16),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                InkWell(
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SavedAddress())),
-                  child: Image.asset("assets/images/img51.png"),
-                ),
-                const SizedBox(height: 16),
-                _buildSummaryCard(),
-                const SizedBox(height: 16),
-                DeliveryOptions(
-                  onDeliveryMethodSelected: (method) =>
-                      setState(() => deliveryMethod = method),
-                  onAddressSelected: (address) =>
-                      setState(() => selectedAddress = address),
-                ),
-                const SizedBox(height: 16),
-                const Text('الملاحظات',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                _buildTextField('ادخل الملاحظات الخاصة بك ان وجدت'),
-                const SizedBox(height: 16),
-                Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        const Text('قيمه الطلب',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                        const Divider(),
-                        _buildPriceRow('قيمه الخدمات', '70'),
-                        const Divider(),
-                        _buildPriceRow('الضريبه', '15'),
-                        const Divider(),
-                        _buildPriceRow('الاجمالي', '85', isTotal: true),
-                      ],
+                  const SizedBox(height: 8),
+                  _buildSelectedFilesList(),
+                  const SizedBox(height: 16),
+                  _buildDropdown(
+                      Translations.getText(
+                        'cho',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      availableLanguages,
+                      selectedLanguage, (value) {
+                    setState(() => selectedLanguage = value);
+                  }),
+                  _buildDropdown(
+                      Translations.getText(
+                        'cho2',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      availableLanguages2,
+                      selectedLanguage2, (value) {
+                    setState(() => selectedLanguage2 = value);
+                  }),
+                  const SizedBox(height: 16),
+                  Text(
+                      Translations.getText(
+                        'num',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  TextField(
+                    controller: _pagesController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                    decoration: InputDecoration(
+                      hintText: Translations.getText(
+                        'num2',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xffF2F2F2),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                _buildSubmitButton(),
-              ],
+                  const SizedBox(height: 16),
+                  Text(
+                      Translations.getText(
+                        'num3',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  TextField(
+                    controller: _copiesController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => setState(() {}),
+                    decoration: InputDecoration(
+                      hintText: Translations.getText(
+                        'num4',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xffF2F2F2),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SavedAddress())),
+                    child: Image.asset("assets/images/img51.png"),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildSummaryCard(),
+                  const SizedBox(height: 16),
+                  DeliveryOptions(
+                    onDeliveryMethodSelected: (method) =>
+                        setState(() => deliveryMethod = method),
+                    onAddressSelected: (address) =>
+                        setState(() => selectedAddress = address),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                      Translations.getText(
+                        'no',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  _buildTextField(Translations.getText(
+                    'en',
+                    context.read<LocalizationProvider>().locale.languageCode,
+                  )),
+                  const SizedBox(height: 16),
+                  // Card(
+                  //   color: Colors.white,
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(12.0),
+                  //     child: Column(
+                  //       children: [
+                  //         const Text('قيمه الطلب',
+                  //             style: TextStyle(
+                  //                 fontSize: 16, fontWeight: FontWeight.bold)),
+                  //         const Divider(),
+                  //         _buildPriceRow('قيمه الخدمات', '70'),
+                  //         const Divider(),
+                  //         _buildPriceRow('الضريبه', '15'),
+                  //         const Divider(),
+                  //         _buildPriceRow('الاجمالي', '85', isTotal: true),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+                  const SizedBox(height: 16),
+                  _buildSubmitButton(),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildTextField(String label) {
@@ -531,146 +620,124 @@ class _PrinterRequestPageState extends State<PrinterRequestPage> {
 class SaveOrder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: const Text("تأكيد الطلب",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-          centerTitle: true,
-        ),
-        body: Column(
-          children: [
-            const SizedBox(
-              height: 30,
-            ),
-            const Directionality(
-                textDirection: TextDirection.rtl,
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Text("كود الخصم",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15)),
-                  ),
-                )),
-            const Directionality(
-              textDirection: TextDirection.rtl,
-              child: CustomTextField(hintText: "ادخل كود الخصم"),
-            ),
-            const Card(
-              color: Colors.white,
-              elevation: 0,
-              child: Padding(
-                padding: EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('قيمه الطلب',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    Divider(),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("قيمه الخدمات", style: TextStyle()),
-                          Text("70"),
-                        ]),
-                    Divider(),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("الضريبه", style: TextStyle()),
-                          Text("15"),
-                        ]),
-                    Divider(),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("الاجمالي",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 14)),
-                          Text("85"),
-                        ]),
-                  ],
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SuccessOrder()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff409EDC),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 12),
-                    minimumSize: const Size(164, 5),
-                  ),
-                  child: const Text(
-                    'الدفع',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF409EDC), width: 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 12),
-                    minimumSize: const Size(164, 5),
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text(
-                    'تراجع',
-                    style: TextStyle(
-                      color: Color(0xFF409EDC),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+    return Consumer<LocalizationProvider>(
+        builder: (context, localizationProvider, child) {
+      final locale = localizationProvider.locale.languageCode;
+      final textDirection =
+          locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
 
-class SuccessOrder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+      return Directionality(
+        textDirection: textDirection,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            title: Text(
+                Translations.getText(
+                  'se',
+                  context.read<LocalizationProvider>().locale.languageCode,
+                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+            centerTitle: true,
+          ),
+          body: Column(
             children: [
-              const Text("تم تسديد قيمة الطلب بنجاج",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               const SizedBox(
-                height: 60,
+                height: 30,
+              ),
+              Directionality(
+                  textDirection: getTextDirection(context),
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: getTextAlignment(context),
+                      child: Text(
+                          Translations.getText(
+                            'dis',
+                            context
+                                .read<LocalizationProvider>()
+                                .locale
+                                .languageCode,
+                          ),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 15)),
+                    ),
+                  )),
+              Directionality(
+                textDirection: getTextDirection(context),
+                child: CustomTextField(
+                    hintText: Translations.getText(
+                  'enen',
+                  context.read<LocalizationProvider>().locale.languageCode,
+                )),
+              ),
+              Card(
+                color: Colors.white,
+                elevation: 0,
+                child: Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          Translations.getText(
+                            'reqv',
+                            context
+                                .read<LocalizationProvider>()
+                                .locale
+                                .languageCode,
+                          ),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                      Divider(),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                                Translations.getText(
+                                  'v',
+                                  context
+                                      .read<LocalizationProvider>()
+                                      .locale
+                                      .languageCode,
+                                ),
+                                style: TextStyle()),
+                            Text("70"),
+                          ]),
+                      Divider(),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                                Translations.getText(
+                                  't',
+                                  context
+                                      .read<LocalizationProvider>()
+                                      .locale
+                                      .languageCode,
+                                ),
+                                style: TextStyle()),
+                            Text("15"),
+                          ]),
+                      Divider(),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                                Translations.getText(
+                                  'tt',
+                                  context
+                                      .read<LocalizationProvider>()
+                                      .locale
+                                      .languageCode,
+                                ),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text("85"),
+                          ]),
+                    ],
+                  ),
+                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -680,7 +747,7 @@ class SuccessOrder extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => OrderDetailsPage()));
+                              builder: (context) => SuccessOrder()));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xff409EDC),
@@ -691,8 +758,14 @@ class SuccessOrder extends StatelessWidget {
                           vertical: 10, horizontal: 12),
                       minimumSize: const Size(164, 5),
                     ),
-                    child: const Text(
-                      'متابعه الطلب',
+                    child: Text(
+                      Translations.getText(
+                        'p',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -712,8 +785,14 @@ class SuccessOrder extends StatelessWidget {
                       minimumSize: const Size(164, 5),
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text(
-                      'طلب خدمه جديده',
+                    child: Text(
+                      Translations.getText(
+                        'rrr',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
                       style: TextStyle(
                         color: Color(0xFF409EDC),
                         fontWeight: FontWeight.bold,
@@ -726,7 +805,119 @@ class SuccessOrder extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
+    });
   }
+
+  TextDirection getTextDirection(BuildContext context) {
+    String languageCode = context.read<LocalizationProvider>().locale.languageCode;
+    return languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr;
+  }
+
+  Alignment getTextAlignment(BuildContext context) {
+    String languageCode = context.read<LocalizationProvider>().locale.languageCode;
+    return languageCode == 'ar' ? Alignment.topRight : Alignment.topLeft;
+  }
+
+}
+
+class SuccessOrder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LocalizationProvider>(
+        builder: (context, localizationProvider, child) {
+          final locale = localizationProvider.locale.languageCode;
+          final textDirection =
+          locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
+
+          return Directionality(
+            textDirection: textDirection,
+            child: Scaffold(
+              backgroundColor: Colors.white,
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                     Text( Translations.getText(
+                      'ordsuc',
+                      context
+                          .read<LocalizationProvider>()
+                          .locale
+                          .languageCode,
+                    ),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 15)),
+                    const SizedBox(
+                      height: 60,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => OrderDetailsPage()));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xff409EDC),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 12),
+                            minimumSize: const Size(164, 5),
+                          ),
+                          child: Text(
+                            Translations.getText(
+                              'ff',
+                              context
+                                  .read<LocalizationProvider>()
+                                  .locale
+                                  .languageCode,
+                            ),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            side:
+                            const BorderSide(
+                                color: Color(0xFF409EDC), width: 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 12),
+                            minimumSize: const Size(164, 5),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Text(
+                            Translations.getText(
+                              'nnn',
+                              context
+                                  .read<LocalizationProvider>()
+                                  .locale
+                                  .languageCode,
+                            ),
+                            style: TextStyle(
+                              color: Color(0xFF409EDC),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }); }
 }
