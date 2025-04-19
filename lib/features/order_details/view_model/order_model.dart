@@ -27,7 +27,7 @@ class OrderModel {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      number: json['number'],
+      number: json['number']??0,
       data: json['date'] ?? '',  // هنا إذا كانت null نضع سلسلة فارغة
       time: json['time'] ?? '',  // هنا إذا كانت null نضع سلسلة فارغة
       status: json['status'] ?? '',  // هنا إذا كانت null نضع سلسلة فارغة
@@ -97,7 +97,7 @@ Future<OrderModel> fetchOrderDetails() async {
   // }
 
   final response = await http.get(
-    Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/48'),
+    Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/90'),//////اكيد مش 90
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',
