@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../main.dart';
 import '../../localization/change_lang.dart';
 import '../../printing_request/view/printer_request_page.dart';
 import '../../printing_with_api/print.dart';
@@ -22,10 +23,10 @@ class ContentViewModel extends ChangeNotifier {
         'title': Translations.getText('tran', localeCode),
         'description': Translations.getText('offerr', localeCode),
         'image': 'assets/images/img5.png',
-        'page': TranslationRequestPage(),
+        'page': TranslationOrderApp(),
       },
       {
-        'title': 'الطباعة',
+        'title':Translations.getText('pri', localeCode),
         'description': Translations.getText('oferrr2', localeCode),
         'image': 'assets/images/img6.png',
         'page': PrinterRequestPageWithApi(),

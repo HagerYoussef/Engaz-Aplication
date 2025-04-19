@@ -253,7 +253,21 @@ class Translations {
       "locname":"Location Name",
       "location":"Location",
     "addadd":"Add Address",
-      "savee":"Save Changes"
+      "savee":"Save Changes",
+
+
+      "tranthereq":"Translation request",
+  "newreq":"New translation request",
+      "langneed":"Language to be translated",
+      "edjat":"Click to select language",
+      "addressway":"Method Of Delivery",
+      "attach":"Attachments to be translated",
+      "attach2":"Please attach the attachments ",
+  "chooose":"Choose",
+      "notess":"Notes"
+      ,"send_req":"Send Request",
+
+
     },
     'ar': {
       "appTitle": "تطبيقي",
@@ -349,8 +363,20 @@ class Translations {
       "locname":"اسم الموقع",
       "location":"الموقع"
       ,"addadd":"اضافه عنوان",
-      "savee":"حفظ التعديلات"
-    },
+      "savee":"حفظ التعديلات",
+
+
+  "tranthereq":"طلب ترجمه",
+  "newreq":"طلب ترجمه جديد",
+  "langneed":"الرجاء اختيار اللغه المراد ترجمتها",
+  "edjat":"اضغط لاختيار اللغه",
+  "addressway":"طريقه التوصيل",
+  "attach":"المرفقات المراد ترجمتها",
+  "attach2":"الرجاء ارفاق المرفقات المراد ترجتها",
+"chooose":"اختر",
+      "notess":"الملاحظات","send_req":"ارسال الطلب"
+
+},
   };
 
   static String getText(String key, String langCode) {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -32,9 +34,7 @@ class ApiService {
       };
 
       request.fields['fileLanguage'] = languageMap[fileLanguage]!;
-      request.fields['translationLanguages[]'] = 'Arabic';
-      request.fields['translationLanguages[]'] = 'Dutch';
-      request.fields['translationLanguages[]'] = 'French';
+      request.fields['translationLanguges'] = jsonEncode(["English", "Dutch"]);
       request.fields['methodOfDelivery'] = _mapDeliveryMethod(deliveryMethod);
       request.fields['notes'] = notes.isNotEmpty ? notes : "";
       if (deliveryMethod == 'توصيل' && address != null) {
