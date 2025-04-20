@@ -6,6 +6,7 @@ import '../contact_us/contactus_screen.dart';
 import '../edit_profile/edit_profile_screen.dart';
 import '../general_settings/general_settings_screen.dart';
 import '../localization/change_lang.dart';
+import '../logout/logout_screen.dart';
 import '../privacy_policy/privacy_policy_screen.dart';
 import '../saved_order/view/saved_order.dart';
 import '../terms_and_conditions/terms_and_conditions_screen.dart';
@@ -146,7 +147,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     child: InkWell(
                       onTap: () {
-                        //Navigator.push(context,MaterialPageRoute(builder:(context)=>LogOut()));
+                        Navigator.push(context,MaterialPageRoute(builder:(context)=>LogOut()));
                       },
                       child: Row(
                         children: [

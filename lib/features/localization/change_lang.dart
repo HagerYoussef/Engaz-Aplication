@@ -279,11 +279,15 @@ class Translations {
       "canc":"Cancel order",
       "pleas":"Please enter the reason for cancellation.",
       "know":"Explain the reason for cancellation",
-      "tra":"Retreat"
+      "tra":"Retreat",
+      "res":"Reason Deletion",
 
 
-
-
+  "del":"Delete account",
+  "do":"Do you really want to delete your account?",
+  "re":"Reason for deleting account *",
+  "pl":"Please explain the reason for deletion.",
+  "del2":"Delete"
 
 
 
@@ -405,10 +409,19 @@ class Translations {
       "noo":"ملاحظات",
       "atta":"المرفقات",
       "canc":"الغاء الطلب",
-      "res":"سبب الالغاء",/////
+      "res":"سبب الالغاء",
       "pleas":"من فضلك أدخل سبب الإلغاء",
       "know":"توضيح سبب الالغاء",
-      "tra":"تراجع"
+
+
+      "tra":"تراجع",
+
+
+      "del":"حذف الحساب",
+      "do":"هل حقاً تريد حذف حسابك؟",
+      "re":"سبب حذف الحساب *",
+      "pl":"الرجاء توضيح سبب الحذف",
+      "del2":"حذف"
 
 
 
