@@ -3,58 +3,74 @@ import 'dart:convert';
 import 'package:engaz_app/features/order_details/view_model/order_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../localization/change_lang.dart';
 
 class OrderDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: const Color(0xffF2F2F2),
-        appBar: AppBar(
-          backgroundColor: const Color(0xffF2F2F2),
-          title: const Text('تفاصيل الطلب'),
-          leading: const Icon(Icons.arrow_back_ios_new),
-        ),
-        body: FutureBuilder<OrderModel>(
-          future: fetchOrderDetails(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('حدث خطأ: ${snapshot.error}'));
-            } else if (!snapshot.hasData) {
-              return const Center(child: Text('لا توجد بيانات'));
-            }
+    return Consumer<LocalizationProvider>(
+        builder: (context, localizationProvider, child) {
+      final locale = localizationProvider.locale.languageCode;
+      final textDirection =
+          locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
 
-            final order = snapshot.data!;
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  OrderInfoSection(order: order),
-                  const SizedBox(height: 16.0),
-                  DeliveryInfoSection(delivery: order.delivery, order: order,),
-                  const SizedBox(height: 16.0),
-                  TranslationLanguagesSection(
-                    from: order.translationFrom,
-                    to: order.translationTo,
-                  ),
-                  const SizedBox(height: 16.0),
-                  NotesSection(notes: order.notes),
-                  const SizedBox(height: 16.0),
-                  AttachmentsSection(files: order.files),
-                  const SizedBox(height: 16.0),
-                  CancelOrderButton(),
-                ],
-              ),
-            );
-          },
+      return Directionality(
+        textDirection: textDirection,
+        child: Scaffold(
+          backgroundColor: const Color(0xffF2F2F2),
+          appBar: AppBar(
+            backgroundColor: const Color(0xffF2F2F2),
+            title: Text(Translations.getText(
+              'orderdetail',
+              context.read<LocalizationProvider>().locale.languageCode,
+            )),
+            leading: const Icon(Icons.arrow_back_ios_new),
+          ),
+          body: FutureBuilder<OrderModel>(
+            future: fetchOrderDetails(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('حدث خطأ: ${snapshot.error}'));
+              } else if (!snapshot.hasData) {
+                return const Center(child: Text('لا توجد بيانات'));
+              }
+
+              final order = snapshot.data!;
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    OrderInfoSection(order: order),
+                    const SizedBox(height: 16.0),
+                    DeliveryInfoSection(
+                      delivery: order.delivery,
+                      order: order,
+                    ),
+                    const SizedBox(height: 16.0),
+                    TranslationLanguagesSection(
+                      from: order.translationFrom,
+                      to: order.translationTo,
+                    ),
+                    const SizedBox(height: 16.0),
+                    NotesSection(notes: order.notes),
+                    const SizedBox(height: 16.0),
+                    AttachmentsSection(files: order.files),
+                    const SizedBox(height: 16.0),
+                    CancelOrderButton(),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -65,45 +81,55 @@ class OrderInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Card(
+    return Card(
         elevation: 0,
         color: Colors.white,
         child: Padding(
-        padding: const EdgeInsets.all(12.0),
-    child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('رقم الطلب ',
-                  style:
-                  TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Text('${order.number}', style:
-              TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ],
-          ),
-       Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('تاريخ الطلب ',
-              style:
-              TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-          Text('${order.data}'),
-        ]),
-          Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('وقت الطلب',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                      Translations.getText(
+                        'ordernumber',
+                        context
+                            .read<LocalizationProvider>()
+                            .locale
+                            .languageCode,
+                      ),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text('${order.number}',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text(
+                    Translations.getText(
+                      'ordercal',
+                      context.read<LocalizationProvider>().locale.languageCode,
+                    ),
                     style:
-                    TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text('${order.data}'),
+              ]),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text(
+                    Translations.getText(
+                      'ordertime',
+                      context.read<LocalizationProvider>().locale.languageCode,
+                    ),
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 Text('${order.time}'),
               ]),
-        
-
-        ],
-      ),
-    ));
+            ],
+          ),
+        ));
   }
 }
 
@@ -111,7 +137,8 @@ class DeliveryInfoSection extends StatelessWidget {
   final Delivery delivery;
   final OrderModel order;
 
-  const DeliveryInfoSection({super.key, required this.delivery, required this.order});
+  const DeliveryInfoSection(
+      {super.key, required this.delivery, required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -122,17 +149,22 @@ class DeliveryInfoSection extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('${order.status}'),
-              SizedBox(height: 10,),
-              Text('نوع التوصيل: ${delivery.type}'),
+              SizedBox(
+                height: 10,
+              ),
+              Text('${Translations.getText(
+                'ordertype',
+                context.read<LocalizationProvider>().locale.languageCode,
+              )}${delivery.type}'),
             ],
           ),
-
           InkWell(
             onTap: () {
               // Navigator.push(
@@ -144,10 +176,8 @@ class DeliveryInfoSection extends StatelessWidget {
                 backgroundColor: const Color(0xff409EDC),
                 child: Image.asset("assets/images/img19.png")),
           ),
-
         ],
       ),
-
     );
   }
 }
@@ -174,13 +204,27 @@ class TranslationLanguagesSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('اللغة المراد ترجمتها',
+          Text(
+              Translations.getText(
+                'lan1',
+                context.read<LocalizationProvider>().locale.languageCode,
+              ),
               style: TextStyle(fontSize: 15, color: Color(0xffB3B3B3))),
-          Text('$from',style:  TextStyle(color: Color(0xff409EDC),)),
+          Text('$from',
+              style: TextStyle(
+                color: Color(0xff409EDC),
+              )),
           const SizedBox(height: 8),
-          Text('اللغات المراد الترجمة إليها:',
-              style: TextStyle(fontSize: 15, color: Color(0xffB3B3B3))), ...to.map((lang) => Text(
-            '${lang.arabicName} (${lang.name}) - ${lang.cost} جنيه', style: TextStyle(color: Color(0xff409EDC))),
+          Text(
+              Translations.getText(
+                'lan2',
+                context.read<LocalizationProvider>().locale.languageCode,
+              ),
+              style: TextStyle(fontSize: 15, color: Color(0xffB3B3B3))),
+          ...to.map(
+            (lang) => Text(
+                '${lang.arabicName} (${lang.name}) - ${lang.cost} جنيه',
+                style: TextStyle(color: Color(0xff409EDC))),
           ),
         ],
       ),
@@ -195,7 +239,8 @@ class NotesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (notes.isEmpty || notes.toLowerCase() == 'optional') return SizedBox.shrink();
+    if (notes.isEmpty || notes.toLowerCase() == 'optional')
+      return SizedBox.shrink();
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -206,7 +251,12 @@ class NotesSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('ملاحظات:', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+              '${Translations.getText(
+                'noo',
+                context.read<LocalizationProvider>().locale.languageCode,
+              )}',
+              style: TextStyle(fontWeight: FontWeight.bold)),
           Text(notes),
         ],
       ),
@@ -232,14 +282,19 @@ class AttachmentsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('المرفقات',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),  ...files.map((file) => Row(
-            children: [
-               Image.asset("assets/images/img10.png"),
-              const SizedBox(width: 8),
-              Text(file),
-            ],
-          )),
+          Text(
+              Translations.getText(
+                'atta',
+                context.read<LocalizationProvider>().locale.languageCode,
+              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ...files.map((file) => Row(
+                children: [
+                  Image.asset("assets/images/img10.png"),
+                  const SizedBox(width: 8),
+                  Text(file),
+                ],
+              )),
         ],
       ),
     );
@@ -264,7 +319,6 @@ class AttachmentIcon extends StatelessWidget {
   }
 }
 
-
 class CancelOrderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -285,8 +339,11 @@ class CancelOrderButton extends StatelessWidget {
           minimumSize: const Size(164, 5),
           backgroundColor: Color(0xffE50930),
         ),
-        child: const Text(
-          'الغاء الطلب',
+        child: Text(
+          Translations.getText(
+            'canc',
+            context.read<LocalizationProvider>().locale.languageCode,
+          ),
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,
@@ -294,7 +351,9 @@ class CancelOrderButton extends StatelessWidget {
         ),
       ),
     );
-  }}
+  }
+}
+
 class CancelOrder extends StatelessWidget {
   final TextEditingController _reasonController = TextEditingController();
 
@@ -311,16 +370,23 @@ class CancelOrder extends StatelessWidget {
     final reason = _reasonController.text.trim();
     if (reason.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('من فضلك أدخل سبب الإلغاء')),
+        SnackBar(
+            content: Text(
+          Translations.getText(
+            'pleas',
+            context.read<LocalizationProvider>().locale.languageCode,
+          ),
+        )),
       );
       return;
     }
 
-
     final orderId = 90;
-    final token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';  // تأكد من استخدام التوكن الصحيح
+    final token =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc'; // تأكد من استخدام التوكن الصحيح
 
-    final url = Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/$orderId');
+    final url =
+        Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/$orderId');
 
     final response = await http.delete(
       url,
@@ -354,8 +420,11 @@ class CancelOrder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "الغاء الطلب ",
+        title: Text(
+          Translations.getText(
+            'canc',
+            context.read<LocalizationProvider>().locale.languageCode,
+          ),
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
         centerTitle: true,
@@ -370,14 +439,17 @@ class CancelOrder extends StatelessWidget {
         children: [
           Center(child: Image.asset("assets/images/img24.png")),
           const SizedBox(height: 30),
-          const Directionality(
+          Directionality(
             textDirection: TextDirection.rtl,
             child: Padding(
               padding: EdgeInsets.all(8.0),
               child: Align(
                 alignment: Alignment.topRight,
                 child: Text(
-                  "سبب الالغاء",
+                  Translations.getText(
+                    'res',
+                    context.read<LocalizationProvider>().locale.languageCode,
+                  ),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ),
@@ -386,17 +458,21 @@ class CancelOrder extends StatelessWidget {
           Directionality(
             textDirection: TextDirection.rtl,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: TextFormField(
                 controller: _reasonController,
                 decoration: InputDecoration(
-                  hintText: 'توضيح سبب الالغاء',
+                  hintText: Translations.getText(
+                    'know',
+                    context.read<LocalizationProvider>().locale.languageCode,
+                  ),
                   hintStyle: const TextStyle(color: Color(0xffB3B3B3)),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xffF2F2F2), width: 1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                 ),
                 maxLines: 5,
               ),
@@ -414,12 +490,16 @@ class CancelOrder extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                   minimumSize: const Size(164, 5),
                   foregroundColor: Colors.white,
                 ),
-                child: const Text(
-                  'الغاء',
+                child:  Text(
+                  Translations.getText(
+                    'canc',
+                    context.read<LocalizationProvider>().locale.languageCode,
+                  ),
                   style: TextStyle(
                     color: Color(0xFFE50930),
                     fontWeight: FontWeight.bold,
@@ -436,11 +516,15 @@ class CancelOrder extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                   minimumSize: const Size(164, 5),
                 ),
-                child: const Text(
-                  'تراجع',
+                child: Text(
+                  Translations.getText(
+                    'tra',
+                    context.read<LocalizationProvider>().locale.languageCode,
+                  ),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,

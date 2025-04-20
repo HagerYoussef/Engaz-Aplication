@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "205532306300",
+    "project_id": "enjaz-c30ae",
+    "storage_bucket": "enjaz-c30ae.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:205532306300:android:97d77604d723f655fe22f9",
+        "android_client_info": {
+          "package_name": "com.example.engaz_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWvoJbKVcWjSsfN3MDs_if2PlMzaZrhDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -247,25 +247,45 @@ class Translations {
       "p": "Payment",
       "ff": "Follow",
       "nnn": "New Request",
-      "rrr": "Retreat", "ordsuc":"The order value has been paid successfully.",
+      "rrr": "Retreat",
+      "ordsuc": "The order value has been paid successfully.",
+      "editadd": "Edit Address",
+      "locname": "Location Name",
+      "location": "Location",
+      "addadd": "Add Address",
+      "savee": "Save Changes",
+      "tranthereq": "Translation request",
+      "newreq": "New translation request",
+      "langneed": "Language to be translated",
+      "edjat": "Click to select language",
+      "addressway": "Method Of Delivery",
+      "attach": "Attachments to be translated",
+      "attach2": "Please attach the attachments ",
+      "chooose": "Choose",
+      "notess": "Notes",
+      "send_req": "Send Request",
 
-      "editadd":"Edit Address",
-      "locname":"Location Name",
-      "location":"Location",
-    "addadd":"Add Address",
-      "savee":"Save Changes",
 
 
-      "tranthereq":"Translation request",
-  "newreq":"New translation request",
-      "langneed":"Language to be translated",
-      "edjat":"Click to select language",
-      "addressway":"Method Of Delivery",
-      "attach":"Attachments to be translated",
-      "attach2":"Please attach the attachments ",
-  "chooose":"Choose",
-      "notess":"Notes"
-      ,"send_req":"Send Request",
+      "orderdetail":"Order details",
+      "ordernumber":"order number ",
+      "ordercal":"Order date ",
+      "ordertime":"Order time ",
+      "ordertype":"Delivery type",
+      "lan1":"Language to be translated",
+      "lan2":"Languages to be translated into",
+      "noo":"Notes",
+      "atta":"Attachments",
+      "canc":"Cancel order",
+      "pleas":"Please enter the reason for cancellation.",
+      "know":"Explain the reason for cancellation",
+      "tra":"Retreat"
+
+
+
+
+
+
 
 
     },
@@ -357,26 +377,48 @@ class Translations {
       "ff": "متابعه الطلب",
       "nnn": "طلب خدمه جديده",
       "rrr": "تراجع",
-      "ordsuc":"تم تسدسد قيمه الطلب بنجاح",
+      "ordsuc": "تم تسدسد قيمه الطلب بنجاح",
+      "editadd": "تعديل العنوان",
+      "locname": "اسم الموقع",
+      "location": "الموقع",
+      "addadd": "اضافه عنوان",
+      "savee": "حفظ التعديلات",
+      "tranthereq": "طلب ترجمه",
+      "newreq": "طلب ترجمه جديد",
+      "langneed": "الرجاء اختيار اللغه المراد ترجمتها",
+      "edjat": "اضغط لاختيار اللغه",
+      "addressway": "طريقه التوصيل",
+      "attach": "المرفقات المراد ترجمتها",
+      "attach2": "الرجاء ارفاق المرفقات المراد ترجتها",
+      "chooose": "اختر",
+      "notess": "الملاحظات",
+      "send_req": "ارسال الطلب",
 
-      "editadd":"تعديل العنوان",
-      "locname":"اسم الموقع",
-      "location":"الموقع"
-      ,"addadd":"اضافه عنوان",
-      "savee":"حفظ التعديلات",
+
+      "orderdetail":"تفاصيل الطلب",
+      "ordernumber":"رقم الطلب ",
+      "ordercal":"تاريخ الطلب ",
+      "ordertime":"وقت الطلب ",
+      "ordertype":"نوع التوصيل",
+      "lan1":"اللغة المراد ترجمتها",
+      "lan2":"اللغات المراد الترجمة إليها:",
+      "noo":"ملاحظات",
+      "atta":"المرفقات",
+      "canc":"الغاء الطلب",
+      "res":"سبب الالغاء",/////
+      "pleas":"من فضلك أدخل سبب الإلغاء",
+      "know":"توضيح سبب الالغاء",
+      "tra":"تراجع"
 
 
-  "tranthereq":"طلب ترجمه",
-  "newreq":"طلب ترجمه جديد",
-  "langneed":"الرجاء اختيار اللغه المراد ترجمتها",
-  "edjat":"اضغط لاختيار اللغه",
-  "addressway":"طريقه التوصيل",
-  "attach":"المرفقات المراد ترجمتها",
-  "attach2":"الرجاء ارفاق المرفقات المراد ترجتها",
-"chooose":"اختر",
-      "notess":"الملاحظات","send_req":"ارسال الطلب"
 
-},
+
+
+
+
+
+
+    },
   };
 
   static String getText(String key, String langCode) {

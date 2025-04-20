@@ -1,10 +1,10 @@
 import 'dart:convert';
-
 import 'package:engaz_app/features/auth/login/view/login_screen.dart';
 import 'package:engaz_app/features/auth/login/viewmodel/login_viewmodel.dart';
 import 'package:engaz_app/features/splash/viewmodel/splash_viewmodel.dart';
 import 'package:engaz_app/features/translation%20_request/view/translation_request_page.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
@@ -20,8 +20,14 @@ import 'features/order_details/order_details_page.dart';
 import 'features/orders/orders_screen.dart';
 import 'features/printing_with_api/print.dart';
 import 'features/settings/settings_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_sha_fingerprint/flutter_sha_fingerprint.dart';
 
-void main() {
+void main()async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await FlutterShaFingerprint.getFingerprints();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => SplashViewModel()),
     ChangeNotifierProvider(create: (_) => LoginViewModel()),
@@ -47,12 +53,12 @@ class MyApp extends StatelessWidget {
         Locale('ar'),
       ],
       localizationsDelegates: [
-        // تفويض الترجمة هنا
+
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: OrderDetailsPage(),
+      home: LoginScreen(),
     );
   }
 }
