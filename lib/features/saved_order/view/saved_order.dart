@@ -301,19 +301,16 @@ class _SavedAddressState extends State<SavedAddress> {
 
   Future<void> _fetchAddresses() async {
     final prefs = await SharedPreferences.getInstance();
-    //String? userId = '6abd1b36-1dd1-4609-a164-de89bc5af01d';
-    String? userId = prefs.getString('userId');
+
+    //String? userId = prefs.getString('userId');
     //String? token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
     String? token = prefs.getString('token');
     String? addressId;
 
-    print('userId: $userId');
+
     print('token: $token');
 
-    if (userId == null || token == null) {
-      print('User ID or token not found');
-      return;
-    }
+
 
     try {
       final response = await http.get(
@@ -368,74 +365,74 @@ class _SavedAddressState extends State<SavedAddress> {
 
           return Directionality(
             textDirection: textDirection,
-      child: Scaffold(
-        backgroundColor: const Color(0xffF8F8F8),
-        appBar: AppBar(
-          leading: const Icon(Icons.arrow_back_ios),
-          title:  Text(Translations.getText(
-            'saved_address',
-            context
-                .read<LocalizationProvider>()
-                .locale
-                .languageCode,
-          ),
-              style: TextStyle(color: Colors.black)),
-          backgroundColor: const Color(0xffF8F8F8),
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.black),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                        child: Image.asset('assets/images/img52.png',
-                            height: 100)),
-                    const SizedBox(height: 20),
-                     Center(
-                      child: Text(
-                          Translations.getText(
-                            'choose',
-                            context
-                                .read<LocalizationProvider>()
-                                .locale
-                                .languageCode,
+            child: Scaffold(
+              backgroundColor: const Color(0xffF8F8F8),
+              appBar: AppBar(
+                leading: const Icon(Icons.arrow_back_ios),
+                title:  Text(Translations.getText(
+                  'saved_address',
+                  context
+                      .read<LocalizationProvider>()
+                      .locale
+                      .languageCode,
+                ),
+                    style: TextStyle(color: Colors.black)),
+                backgroundColor: const Color(0xffF8F8F8),
+                elevation: 0,
+                iconTheme: const IconThemeData(color: Colors.black),
+              ),
+              body: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                              child: Image.asset('assets/images/img52.png',
+                                  height: 100)),
+                          const SizedBox(height: 20),
+                          Center(
+                            child: Text(
+                              Translations.getText(
+                                'choose',
+                                context
+                                    .read<LocalizationProvider>()
+                                    .locale
+                                    .languageCode,
+                              ),
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                          const SizedBox(height: 20),
+                          ...addresses.map((address) => _buildAddressCard(
+                            address.name,
+                            address.address,
+                          )).toList(),
+
+                          const SizedBox(height: 10),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    ...addresses.map((address) => _buildAddressCard(
-                      address.name,
-                      address.address,
-                    )).toList(),
-
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  if (selectedAddress != null) _buildDeliveryButton(),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: _buildAddAddressButton(),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        if (selectedAddress != null) _buildDeliveryButton(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: _buildAddAddressButton(),
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
+            ),
+          );
+        }
     );}
   Widget _buildAddressCard(String title, String address) {
     bool isSelected = selectedAddress == title;
@@ -460,7 +457,7 @@ class _SavedAddressState extends State<SavedAddress> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(title,
@@ -537,13 +534,13 @@ class _SavedAddressState extends State<SavedAddress> {
           );
         },
         child:  Text(
-            Translations.getText(
-              'dilvery',
-              context
-                  .read<LocalizationProvider>()
-                  .locale
-                  .languageCode,
-            ),
+          Translations.getText(
+            'dilvery',
+            context
+                .read<LocalizationProvider>()
+                .locale
+                .languageCode,
+          ),
           style: TextStyle(fontSize: 16),
         ),
       ),

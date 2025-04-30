@@ -53,7 +53,7 @@ class AddAddressViewModel extends ChangeNotifier {
     };
 
     final Map<String, dynamic> requestBody = {
-      "name": "Home3",
+      "name": "Home",
       "address": locationController.text,
       "location": locationController.text.isNotEmpty
           ? locationController.text
@@ -165,7 +165,7 @@ class AddAddressViewModel extends ChangeNotifier {
     notifyListeners();
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? addressId = prefs.getString('address_id');
+    String? addressId = prefs.getString('addressId');
    // String? addressId = '3772252d-57cd-404a-9411-e07da54deeca';
 
     if (addressId == null) {

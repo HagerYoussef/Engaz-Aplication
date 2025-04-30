@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../localization/change_lang.dart';
+import '../order_details/order_details_page.dart';
 
 class OrdersScreen extends StatefulWidget {
   @override
@@ -19,7 +20,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   int _selectedTabIndex = 0;
 
   //late String userId;
-   Future<List<dynamic>>? _ordersFuture;
+  Future<List<dynamic>>? _ordersFuture;
 
   final Map<String, Map<String, dynamic>> statusDetails = {
     'Under Review': {
@@ -56,7 +57,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
   void initState() {
     super.initState();
     _initializeData();
-
   }
 
   Future<void> _initializeData() async {
@@ -65,7 +65,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
       //userId = prefs.getString('id') ?? '';
     });
     _ordersFuture = _fetchOrders('جديد');
-
   }
 
   Future<List<dynamic>> _fetchOrders(String tabStatus) async {
@@ -77,22 +76,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       return prefs.getString('token');
     }
+
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId');
 
-    final response = await http.post(
+    final response = await http.get(
       Uri.parse(
-        'https://wckb4f4m-3000.euw.devtunnels.ms/api/order/$userId?type=$type&status=$statusParam',
+        'https://wckb4f4m-3000.euw.devtunnels.ms/api/order?type=$type&status=$statusParam',
       ),
 
       headers: {
         'Content-Type': 'application/json',
         "Authorization": "Bearer ${await _getToken()}",
       },
-      body: jsonEncode({
-        'type': type,
-        'status': statusParam,
-      }),
+      // body: jsonEncode({
+      //   'type': type,
+      //   'status': statusParam,
+      // }),
     );
 
     if (response.statusCode == 200) {
@@ -128,11 +128,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
             appBar: AppBar(
               leading: Icon(Icons.arrow_back_ios_new),
               backgroundColor: const Color(0xffFAFAFA),
-              title:
-                   Text( Translations.getText(
+              title: Text(
+                  Translations.getText(
                     'ord',
                     context.read<LocalizationProvider>().locale.languageCode,
-                  ), style: TextStyle(color: Colors.black)),
+                  ),
+                  style: TextStyle(color: Colors.black)),
               elevation: 0,
               actions: [
                 Padding(
@@ -161,10 +162,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           _ordersFuture = _fetchOrders('جديد');
                         }),
                         child: _buildTabButton(
-                        Translations.getText(
-                            'tranorder',
-                            context.read<LocalizationProvider>().locale.languageCode,
-                          ), isTranslationSelected),
+                            Translations.getText(
+                              'tranorder',
+                              context
+                                  .read<LocalizationProvider>()
+                                  .locale
+                                  .languageCode,
+                            ),
+                            isTranslationSelected),
                       ),
                       GestureDetector(
                         onTap: () => setState(() {
@@ -174,8 +179,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         child: _buildTabButton(
                             Translations.getText(
                               'tranorder2',
-                              context.read<LocalizationProvider>().locale.languageCode,
-                            ), !isTranslationSelected),
+                              context
+                                  .read<LocalizationProvider>()
+                                  .locale
+                                  .languageCode,
+                            ),
+                            !isTranslationSelected),
                       ),
                     ],
                   ),
@@ -244,77 +253,90 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
-                        return Center(child: Text('حدث خطأ: ${snapshot.error}'));
+                        return Center(
+                            child: Text('حدث خطأ: ${snapshot.error}'));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return Center(child: Text('لا يوجد طلبات'));
                       }
 
                       final orders = snapshot.data!;
-                      return
-
-
-
-                        ListView.builder(
+                      return ListView.builder(
                         itemCount: orders.length,
                         itemBuilder: (context, index) {
                           final order = orders[index];
-                          return
-
-
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-
-                                    Text(order['createdAt']??'',),
-                                    Text( '#'+ order['number'].toString()??'',style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize :20
-                                    ),),
-
+                                    Text(
+                                      order['createdAt'] ?? '',
+                                    ),
+                                    Text(
+                                      '#' + order['number'].toString() ?? '',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20),
+                                    ),
                                   ],
                                 ),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(  order['delivery']??'',),
-
-                                    Text( 'اللغه ${order['language']??''}'),
-
-
+                                    Text(
+                                      order['delivery'] ?? '',
+                                    ),
+                                    Text('اللغه ${order['language'] ?? ''}'),
                                   ],
                                 ),
-
-
-                                Row(mainAxisAlignment: MainAxisAlignment.end,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Text(  order['filescount'].toString()??'',),
-
+                                    Text(
+                                      order['filescount'].toString() ?? '',
+                                    ),
                                     Text(":عدد المرفقات"),
-                                      ],
+                                  ],
                                 ),
-
-
-                                Align(
-                                    alignment: Alignment.topRight,
-                                    child: Text( order['status']??'',)),
-
-
-
-
-
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                OrderDetailsPage(
+                                              orderNumber:
+                                                  order['number'].toString(),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Image.asset(
+                                          "assets/images/img17.png"),
+                                    ),
+                                    Align(
+                                        alignment: Alignment.topRight,
+                                        child: Text(
+                                          order['status'] ?? '',
+                                        )),
+                                  ],
+                                ),
                               ],
-                                                        ),
-                            );
+                            ),
+                          );
                         },
                       );
                     },
                   ),
                 ),
-
               ],
             ),
           ),
@@ -337,7 +359,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
         return 'جديد';
     }
   }
-
 }
 
 Widget _buildTabButton(String text, bool isSelected) {
@@ -355,161 +376,4 @@ Widget _buildTabButton(String text, bool isSelected) {
       ),
     ),
   );
-}
-
-class OrderItem extends StatelessWidget {
-  final String orderNumber;
-  final String createdAt;
-  final String language;
-  final String filesCount;
-  final String statusText;
-  final Color statusColor;
-  final String statusImage;
-  final String deliveryType;
-  final String orderId;
-
-  const OrderItem({
-    Key? key,
-    required this.orderNumber,
-    required this.createdAt,
-    required this.language,
-    required this.filesCount,
-    required this.statusText,
-    required this.statusColor,
-    required this.statusImage,
-    required this.deliveryType,
-    required this.orderId,
-  }) : super(key: key);
-
-  String _mapDelivery(String delivery) {
-    return delivery == 'Office' ? 'استلام من الفرع' : 'توصيل';
-  }
-
-  void _showOrderDetails(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('تفاصيل الطلب #$orderNumber'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDetailItem('الحالة', statusText),
-            _buildDetailItem('تاريخ الإنشاء', createdAt),
-            _buildDetailItem('طريقة التسليم', _mapDelivery(deliveryType)),
-            _buildDetailItem('اللغة', language),
-            _buildDetailItem('عدد المرفقات', filesCount),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('إغلاق'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailItem(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text('$title: ', style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(width: 8),
-          Text(value),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Card(
-        elevation: 0,
-        color: Colors.white,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('#$orderNumber',
-                      style: const TextStyle(
-                          color: Color(0xff1D1D1D),
-                          fontWeight: FontWeight.bold)),
-                  Text(createdAt, style: const TextStyle(color: Colors.grey)),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Text('اللغه:',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff1D1D1D))),
-                      const SizedBox(width: 5),
-                      Text(language,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.blue)),
-                    ],
-                  ),
-                  Text(
-                    _mapDelivery(deliveryType),
-                  )
-                ],
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  const Text('عدد المرفقات:',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff1D1D1D))),
-                  const SizedBox(width: 5),
-                  Text(filesCount,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.blue)),
-                ],
-              ),
-              const Divider(color: Color(0xffF2F2F2)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Image.asset(statusImage, width: 20),
-                      const SizedBox(width: 5),
-                      Text(statusText, style: TextStyle(color: statusColor)),
-                    ],
-                  ),
-                  TextButton(
-                    onPressed: () => _showOrderDetails(context),
-                    child: Row(
-                      children: [
-                        Image.asset("assets/images/img17.png"),
-                        const SizedBox(width: 5),
-                        const Text('عرض الطلب',
-                            style: TextStyle(color: Colors.blue)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
