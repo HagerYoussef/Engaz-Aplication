@@ -24,7 +24,7 @@ class _OtpScreenChangeEmailScreenState extends State<OtpScreenChangeEmailScreen>
   Future<void> verifyCode(String code) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('authToken') ?? '';
+      final token = prefs.getString('token') ?? '';
       final userId = JwtDecoder.decode(token)['user_id'];
 
       final url = Uri.parse(

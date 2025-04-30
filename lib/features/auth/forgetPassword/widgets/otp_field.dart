@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class OtpFields extends StatefulWidget {
-  const OtpFields({super.key});
+  final List<String> otpValues;
+
+  const OtpFields({super.key, required this.otpValues});
 
   @override
   State<OtpFields> createState() => _OtpFieldsState();
@@ -56,8 +58,7 @@ class _OtpFieldsState extends State<OtpFields> {
               style: const TextStyle(fontSize: 24),
               cursorColor: Color.fromRGBO(64, 157, 220, 1),
               onChanged: (value) {
-                otpValues[index] = value;
-                print("otpValues$otpValues");
+                widget.otpValues[index] = value;
                 if (value.isNotEmpty && index < 3) {
                   FocusScope.of(context).requestFocus(focusNodes[index + 1]);
                 }

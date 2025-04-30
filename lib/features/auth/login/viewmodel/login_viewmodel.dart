@@ -34,6 +34,7 @@ class LoginViewModel extends ChangeNotifier {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('userId', result['userId']);
+     print( 'gvdsfgh'+result['userId']);
       prefs.setString('message', result['message']);
     } else {
       loginState = LoginState.failure;
@@ -60,12 +61,15 @@ class LoginViewModel extends ChangeNotifier {
 
     final result = await signupService.signUp(context, signUpModel);
 
-    if (result['success']) {
+    print('Full result: $result'); // اطبع الريسبونس كله هنا
+
+    if (result.containsKey('user')) {
       registerState = RegisterState.success;
 
-
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('user', result['userId']);
+      prefs.setString('user', result['user'].toString());
+      print('juydgzj: ${result['user']}');
+
       prefs.setString('message', result['message']);
     } else {
       registerState = RegisterState.failure;

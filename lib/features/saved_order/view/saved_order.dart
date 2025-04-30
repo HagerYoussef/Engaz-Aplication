@@ -301,10 +301,10 @@ class _SavedAddressState extends State<SavedAddress> {
 
   Future<void> _fetchAddresses() async {
     final prefs = await SharedPreferences.getInstance();
-    String? userId = '6abd1b36-1dd1-4609-a164-de89bc5af01d';
-    //String? userId = prefs.getString('userId');
-    String? token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
-    //String? token = prefs.getString('token');
+    //String? userId = '6abd1b36-1dd1-4609-a164-de89bc5af01d';
+    String? userId = prefs.getString('userId');
+    //String? token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
+    String? token = prefs.getString('token');
     String? addressId;
 
     print('userId: $userId');
@@ -317,7 +317,7 @@ class _SavedAddressState extends State<SavedAddress> {
 
     try {
       final response = await http.get(
-        Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/address/$userId'),
+        Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/address'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token', // إضافة التوكن هنا

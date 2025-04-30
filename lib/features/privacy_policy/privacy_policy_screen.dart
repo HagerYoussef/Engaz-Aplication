@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../localization/change_lang.dart';
 
@@ -23,14 +24,22 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   }
 
   Future<void> fetchPrivacy() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/api/dashboard/terms/privacy'),
+        Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/dashboard/terms/privacy'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
-      if (response.statusCode == 200||response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
         final locale = context.read<LocalizationProvider>().locale.languageCode;
+
         setState(() {
           privacyText = locale == 'ar'
               ? data['privacy']['ArabicPrivacy']

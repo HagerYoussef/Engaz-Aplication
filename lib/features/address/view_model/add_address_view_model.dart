@@ -10,7 +10,7 @@ class AddAddressViewModel extends ChangeNotifier {
   TextEditingController locationController = TextEditingController();
   bool isLoading = false;
   LatLng selectedPosition = LatLng(24.7136, 46.6753);
-  String token=  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
+ // String token=  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
 
   Future<void> getAddressFromLatLng(LatLng position) async {
     try {
@@ -48,8 +48,8 @@ class AddAddressViewModel extends ChangeNotifier {
     final url = 'https://wckb4f4m-3000.euw.devtunnels.ms/api/address';
     final headers = {
       "Content-Type": "application/json",
-      //"Authorization": "Bearer ${await _getToken()}",
-      "Authorization": "Bearer $token",
+      "Authorization": "Bearer ${await _getToken()}",
+      //"Authorization": "Bearer $token",
     };
 
     final Map<String, dynamic> requestBody = {
@@ -80,7 +80,7 @@ class AddAddressViewModel extends ChangeNotifier {
       }
 
       else {
-        print('token${token}')
+        print('token${_getToken()}')
         ;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("فشل في الإضافة ❌")),
@@ -180,8 +180,8 @@ class AddAddressViewModel extends ChangeNotifier {
     final url = 'https://wckb4f4m-3000.euw.devtunnels.ms/api/address/$addressId';
     final headers = {
       "Content-Type": "application/json",
-     // "Authorization": "Bearer ${await _getToken()}",
-     "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc"
+     "Authorization": "Bearer ${await _getToken()}",
+    // "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc"
 
     };
 
@@ -192,8 +192,8 @@ class AddAddressViewModel extends ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        //await prefs.remove('address_id');
-        await prefs.remove(addressId);
+        await prefs.remove('address_id');
+        //await prefs.remove(addressId);
         locationController.clear();
 
         ScaffoldMessenger.of(context).showSnackBar(

@@ -8,7 +8,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../viewmodel/login_viewmodel.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,6 +22,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
@@ -25,15 +30,43 @@ class _LoginScreenState extends State<LoginScreen> {
       throw Exception('User cancelled sign-in');
     }
 
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+    final uid = userCredential.user?.uid;
+    final email = userCredential.user?.email;
+    final name = userCredential.user?.displayName;
+
+    final String secretKey = r"h@8G$z!X9rF%2pL^vM&*sYQ1JbT7NcW5x!G3dR0PmA*Zq^vU4L&V9mY6C2H";
+
+    /// إنشاء JWT وتوقيعه بـ HS256
+    final jwt = JWT({
+      'uid': uid,
+      'email': email,
+      'name': name,
+      'iat': DateTime.now().millisecondsSinceEpoch,
+    });
+
+    final signedToken = jwt.sign(SecretKey(secretKey), algorithm: JWTAlgorithm.HS256);
+
+    print("🔐 JWT Token (HS256): $signedToken");
+
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', signedToken);
+
+
+    final storedToken = prefs.getString('token');
+    print("📦 Stored Token from SharedPreferences: $storedToken");
+
+    return userCredential;
+
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../localization/change_lang.dart';
 
@@ -18,15 +19,27 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
   bool _isLoading = true;
 
   Future<void> fetchTerms(String langCode) async {
-    final url =
-    Uri.parse('http://localhost:3000/api/dashboard/terms/conditions');
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final url = Uri.parse(
+        'https://wckb4f4m-3000.euw.devtunnels.ms/api/dashboard/terms/conditions');
+
     try {
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final text = langCode == 'ar'
             ? data['terms']['ArabicTerms']
             : data['terms']['EnglishTerms'];
+
         setState(() {
           _termsText = text;
           _isLoading = false;

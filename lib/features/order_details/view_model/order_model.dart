@@ -84,23 +84,27 @@ Future<OrderModel> fetchOrderDetails() async {
   final prefs = await SharedPreferences.getInstance();
   //final orderId = prefs.getInt('id');
   final orderId = prefs.getInt('id');
-  //final token = prefs.getString('token');
+  final token = prefs.getString('token');
 
-  // if (orderId == null) {
-  //   print('رقم الطلب غير موجود في SharedPreferences');
-  //   throw Exception('رقم الطلب غير موجود');
-  // }
+  if (orderId == null) {
+    print('رقم الطلب غير موجود في SharedPreferences');
+    throw Exception('رقم الطلب غير موجود');
+  }
 
-  // if (token == null) {
-  //   print('التوكن غير موجود في SharedPreferences');
-  //   throw Exception('التوكن غير موجود');
-  // }
-
+  if (token == null) {
+    print('التوكن غير موجود في SharedPreferences');
+    throw Exception('التوكن غير موجود');
+  }
+  Future<String?> _getToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
   final response = await http.get(
-    Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/90'),//////اكيد مش 90
+    Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/$orderId'),//////اكيد مش 90
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',
+      "Authorization": "Bearer ${await _getToken()}",
+      //'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc',
     },
   );
 
