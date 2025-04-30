@@ -128,18 +128,19 @@ class ChangeEmailScreen extends StatelessWidget {
                                     }
 
                                     try {
-                                      final prefs =
-                                          await SharedPreferences.getInstance();
+
                                       // final token = prefs.getString('authToken') ?? '';
                                       // final userId = JwtDecoder.decode(token)['user_id'];
-                                      final token =
-                                          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
-                                      final userId =
-                                          '6abd1b36-1dd1-4609-a164-de89bc5af01d';
+                                      // final token =
+                                      //     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc';
+                                      // final userId =
+                                      //     '6abd1b36-1dd1-4609-a164-de89bc5af01d';
+                                      final prefs = await SharedPreferences.getInstance();
+                                      final token = prefs.getString('token');
 
                                       final response = await http.post(
                                         Uri.parse(
-                                            'https://wckb4f4m-3000.euw.devtunnels.ms/api/user/$userId/chgnageemail/request'),
+                                            'https://wckb4f4m-3000.euw.devtunnels.ms/api/user/chgnageemail'),
                                         headers: {
                                           'Content-Type': 'application/json',
                                           'Authorization': 'Bearer $token',

@@ -84,7 +84,8 @@ class _OtpScreenState extends State<OtpScreen> {
                                   fontFamily: 'IBM_Plex_Sans_Arabic'),
                             ),
                             const SizedBox(height: 16),
-                            const OtpFields(),
+                            OtpFields(otpValues: viewModel.otpValues),
+
                             const SizedBox(height: 16),
 
                             viewModel.isLoading

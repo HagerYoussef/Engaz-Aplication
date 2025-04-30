@@ -13,12 +13,14 @@ class EditProfileScreen extends StatelessWidget {
 
   Future<Map<String, String>> fetchUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    final token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc";
-    final userId = '6abd1b36-1dd1-4609-a164-de89bc5af01d';
+    final token = prefs.getString('token') ?? '';
+
+    // final token =
+    //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc";
+    // final userId = '6abd1b36-1dd1-4609-a164-de89bc5af01d';
 
     final response = await http.get(
-      Uri.parse("https://wckb4f4m-3000.euw.devtunnels.ms/api/user/$userId"),
+      Uri.parse("https://wckb4f4m-3000.euw.devtunnels.ms/api/user"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token"

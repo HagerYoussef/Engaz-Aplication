@@ -57,6 +57,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     final textDirection =
     locale == 'ar' ? TextDirection.rtl : TextDirection.ltr;
 
+
     return Directionality(
     textDirection: textDirection,
           child: Scaffold(

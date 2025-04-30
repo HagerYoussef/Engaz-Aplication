@@ -10,24 +10,23 @@ class SignUpService {
     final url = Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/signup');
 
     try {
-
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(signUpModel.toJson()),
       );
 
+      final res = jsonDecode(response.body); // ← فك التشفير دايمًا
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-
-        return {'success': true, 'message': 'Register Success'};
-      }
-      else if (response.statusCode ==400) {
-
+        return {
+          'success': true,
+          'message': res['message'] ?? 'Register Success',
+          'user': res['user'], // ← رجّع الـ user
+        };
+      } else if (response.statusCode == 400) {
         return {'success': false, 'message': 'Email or phone is already taken'};
-      }
-      else {
-        final res = jsonDecode(response.body);
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(res['message'] ?? 'Register Failed')),
         );

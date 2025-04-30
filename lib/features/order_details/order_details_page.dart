@@ -7,8 +7,11 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../localization/change_lang.dart';
-
 class OrderDetailsPage extends StatelessWidget {
+  final String orderNumber;
+
+  const OrderDetailsPage({Key? key, required this.orderNumber}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<LocalizationProvider>(
@@ -30,7 +33,7 @@ class OrderDetailsPage extends StatelessWidget {
             leading: const Icon(Icons.arrow_back_ios_new),
           ),
           body: FutureBuilder<OrderModel>(
-            future: fetchOrderDetails(),
+            future: fetchOrderDetails(orderNumber),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -62,7 +65,7 @@ class OrderDetailsPage extends StatelessWidget {
                     const SizedBox(height: 16.0),
                     AttachmentsSection(files: order.files),
                     const SizedBox(height: 16.0),
-                    CancelOrderButton(),
+                    CancelOrderButton(orderId: orderNumber,),
                   ],
                 ),
               );
@@ -105,6 +108,7 @@ class OrderInfoSection extends StatelessWidget {
                   Text('${order.number}',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
                 ],
               ),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -320,6 +324,10 @@ class AttachmentIcon extends StatelessWidget {
 }
 
 class CancelOrderButton extends StatelessWidget {
+  final String orderId;
+
+  const CancelOrderButton({Key? key, required this.orderId}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -328,7 +336,7 @@ class CancelOrderButton extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CancelOrder()),
+            MaterialPageRoute(builder: (context) => CancelOrder(orderId: orderId)),
           );
         },
         style: OutlinedButton.styleFrom(
@@ -355,56 +363,43 @@ class CancelOrderButton extends StatelessWidget {
 }
 
 class CancelOrder extends StatelessWidget {
+  final String orderId; // ✅ استقبال orderId من الصفحة اللي قبلها
   final TextEditingController _reasonController = TextEditingController();
 
-  Future<void> _cancelOrder(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    // final orderId = prefs.getInt('orderId');
-    // if (orderId == null) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text('Order ID not found')),
-    //   );
-    //   return;
-    // }
+  CancelOrder({Key? key, required this.orderId}) : super(key: key);
 
+  Future<void> _cancelOrder(BuildContext context) async {
     final reason = _reasonController.text.trim();
     if (reason.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-          Translations.getText(
-            'pleas',
-            context.read<LocalizationProvider>().locale.languageCode,
+          content: Text(
+            Translations.getText(
+              'pleas',
+              context.read<LocalizationProvider>().locale.languageCode,
+            ),
           ),
-        )),
+        ),
       );
       return;
     }
 
-    final orderId = 90;
-    final token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQyNzY2OTkzfQ.-LuSsU2AombLwf1YUm91fNe_VmXtfIDEn9Z8h3N1PAc'; // تأكد من استخدام التوكن الصحيح
+    final url = Uri.parse(
+        'https://wckb4f4m-3000.euw.devtunnels.ms/api/order/$orderId');
 
-    final url =
-        Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/$orderId');
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
 
     final response = await http.delete(
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        'Authorization': 'Bearer $token', // ✅ التوكن الحقيقي
       },
-      body: json.encode({
-        'reason': reason,
-      }),
+      body: json.encode({'reason': reason}),
     );
 
-    if (response.statusCode == 200) {
-      final responseBody = json.decode(response.body);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(responseBody['message'])),
-      );
-    } else if (response.statusCode == 400) {
+    if (response.statusCode == 200 || response.statusCode == 400) {
       final responseBody = json.decode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(responseBody['message'])),
@@ -429,9 +424,7 @@ class CancelOrder extends StatelessWidget {
         ),
         centerTitle: true,
         leading: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
+          onTap: () => Navigator.pop(context),
           child: Image.asset("assets/images/img23.png"),
         ),
       ),
@@ -471,8 +464,8 @@ class CancelOrder extends StatelessWidget {
                     borderSide: BorderSide(color: Color(0xffF2F2F2), width: 1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 12),
                 ),
                 maxLines: 5,
               ),
@@ -482,20 +475,18 @@ class CancelOrder extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               OutlinedButton(
-                onPressed: () {
-                  _cancelOrder(context);
-                },
+                onPressed: () => _cancelOrder(context),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFFE50930), width: 1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10, horizontal: 12),
                   minimumSize: const Size(164, 5),
                   foregroundColor: Colors.white,
                 ),
-                child:  Text(
+                child: Text(
                   Translations.getText(
                     'canc',
                     context.read<LocalizationProvider>().locale.languageCode,
@@ -508,16 +499,14 @@ class CancelOrder extends StatelessWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xff409EDC),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10, horizontal: 12),
                   minimumSize: const Size(164, 5),
                 ),
                 child: Text(

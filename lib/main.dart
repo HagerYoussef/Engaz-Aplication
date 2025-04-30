@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/routing/app_routes.dart';
 import 'features/address/view/address.dart';
 import 'features/address/view_model/add_address_view_model.dart';
@@ -315,6 +316,10 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
   List<XFile> uploadedFiles = [];
 
   final List<String> allLanguages = ['Arabic', 'English', 'French', 'Dutch'];
+  Future<String?> _getToken() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
 
   Future<void> submitOrder() async {
     final request = http.MultipartRequest(
@@ -322,8 +327,9 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
         Uri.parse(
             'https://wckb4f4m-3000.euw.devtunnels.ms/api/order/translation'));
     request.headers.addAll({
-      'Authorization':
-          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQ0OTA0ODYxfQ.VqWDf8dTsutW3qCrALQkI-U_7uZvGzH2Cqs-6v99H5k',
+
+     // 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQ0OTA0ODYxfQ.VqWDf8dTsutW3qCrALQkI-U_7uZvGzH2Cqs-6v99H5k',
+     "Authorization": "Bearer ${await _getToken()}",
       'Connection': 'keep-alive',
     });
     request.fields['fileLanguge'] = fileLanguage ?? '';
