@@ -576,6 +576,7 @@ class _SavedAddressState extends State<SavedAddress> {
   }
 
 }
+
 class AddressModel {
   final String id;
   final String name;
