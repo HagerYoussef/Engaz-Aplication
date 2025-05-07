@@ -9,7 +9,7 @@ class OtpService {
   }) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getString('userId'); // المفروض او ال user
+    String? userId = prefs.getString('userId');
 
     if (userId == null) {
       throw Exception('User ID not found in SharedPreferences');
@@ -29,12 +29,10 @@ class OtpService {
   }
 }
 class OtpResponse {
-  final bool success;
   final String message;
-  final String token;
+  final String? token;
 
   OtpResponse({
-    required this.success,
     required this.message,
     required this.token,
   });
@@ -42,9 +40,10 @@ class OtpResponse {
   // Factory method to create OtpResponse from JSON
   factory OtpResponse.fromJson(Map<String, dynamic> json) {
     return OtpResponse(
-      success: json['success'] ?? false,
       message: json['message'] ?? '',
-      token: json['token'] ?? '', // Ensure token is correctly parsed
+      token: json['token'] ?? '',
     );
   }
+
+  bool get success => message.toLowerCase().contains('success') && token != null;
 }

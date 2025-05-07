@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:engaz_app/features/home_screen/view/home_view.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/otp_services.dart';
 
@@ -12,12 +15,16 @@ enum OtpStatus {
 }
 
 class OtpViewModel extends ChangeNotifier {
-  int minutes = 0;
-  int seconds = 0;
+  final int maxMinutes = 1;
+  final int totalSeconds = 1 * 60;
+  int currentSeconds = 0;
+
   Timer? _timer;
-  final int maxMinutes = 2;
   String? userId;
   String? code;
+
+  int get minutes => currentSeconds ~/ 60;
+  int get seconds => currentSeconds % 60;
 
   OtpStatus _status = OtpStatus.idle;
   String? _errorMessage;
@@ -31,14 +38,17 @@ class OtpViewModel extends ChangeNotifier {
 
   final OtpService _otpService = OtpService();
 
-  // Function to verify the OTP
+  // Constructor: يبدأ المؤقت تلقائيًا
+  OtpViewModel() {
+    startTimer();
+  }
+
   Future<void> verifyOtp(BuildContext context) async {
     String otpCode = otpValues.join('');
     print("codeotp: $otpCode");
 
-
     if (otpCode.length != 4) {
-      print("يرجى إدخال رمز التفعيل");
+      _setError("يرجى إدخال رمز التفعيل الكامل");
       return;
     }
 
@@ -49,61 +59,74 @@ class OtpViewModel extends ChangeNotifier {
 
       if (response.success) {
         _message = "تم التحقق من رمز التفعيل بنجاح";
-        _setStatus(OtpStatus.success);
 
+        final prefs = await SharedPreferences.getInstance();
+        if (response.token != null) {
+          await prefs.setString('token', response.token!);
+        }
 
-        SharedPreferences.getInstance().then((prefs) {
-          prefs.setString('token', response.token);
-        });
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null) {
+          final url = Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/login/token');
+          final fcmResponse = await http.post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ${response.token}',
+            },
+            body: jsonEncode({"token": fcmToken}),
+          );
+          print("✅ FCM token sent after OTP: ${fcmResponse.statusCode} - ${fcmResponse.body}");
+        }
 
-      print('token${response.token}');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
-        );
+        if (context.mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => HomePage()),
+          );
+        }
+
       } else {
-        _setError(response.message.isNotEmpty ? response.message : "رمز التفعيل غير صحيح أو منتهي");
+        _setError(response.message.isNotEmpty
+            ? response.message
+            : "رمز التفعيل غير صحيح أو منتهي");
       }
     } catch (e) {
       _setError("حدث خطأ أثناء الاتصال بالسيرفر");
     }
   }
 
-
   void _setStatus(OtpStatus status) {
     _status = status;
     notifyListeners();
   }
 
-
   void _setError(String message) {
     _errorMessage = message;
     _message = message;
     _setStatus(OtpStatus.failure);
-    print("Error: $message");
+    print("❌ Error: $message");
   }
 
-
   void startTimer() {
+    currentSeconds = totalSeconds;
+    _timer?.cancel();
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (minutes == maxMinutes && seconds == 59) {
-        _timer?.cancel();
-      } else if (seconds == 59) {
-        minutes++;
-        seconds = 0;
+      if (currentSeconds == 0) {
+        timer.cancel();
       } else {
-        seconds++;
+        currentSeconds--;
+        notifyListeners();
       }
-      notifyListeners();
     });
   }
 
-
   void resetTimer() {
     _timer?.cancel();
-    minutes = 0;
-    seconds = 0;
+    currentSeconds = totalSeconds;
+    _message = "تم إرسال رمز جديد إلى الإيميل";
     startTimer();
+    notifyListeners();
   }
 
   @override

@@ -2,7 +2,6 @@ import 'package:engaz_app/features/auth/forgetPassword/widgets/otp_field.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../home_screen/view/home_view.dart';
 import '../viewmodel/otp_viewmodel.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -16,25 +15,29 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
+
+  late OtpViewModel otpProvider;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-        Provider.of<OtpViewModel>(context, listen: false).startTimer());
   }
 
   @override
   void dispose() {
-    Provider.of<OtpViewModel>(context, listen: false).dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => OtpViewModel(),
+    return ChangeNotifierProvider<OtpViewModel>(
+      create: (context) {
+        final viewModel = OtpViewModel();
+        viewModel.startTimer();
+        return viewModel;
+      },
       child: Consumer<OtpViewModel>(
-        builder: (context, viewModel, child) {
+      builder: (context, viewModel, child) {
           return Scaffold(
             backgroundColor: Colors.white,
             body: LayoutBuilder(
@@ -43,7 +46,6 @@ class _OtpScreenState extends State<OtpScreen> {
                 double padding = screenWidth > 600 ? 48 : 24;
                 double imageWidth = screenWidth > 600 ? 250 : 204;
                 double buttonHeight = screenWidth > 600 ? 60 : 50;
-
                 return Stack(
                   children: [
                     SingleChildScrollView(
@@ -67,7 +69,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   fontFamily: 'IBM_Plex_Sans_Arabic'),
                             ),
                             const Text(
-                              ":الرجاء ادخال رمز التفعيل المرسل عبر رقم الجوال التالي",
+                              ": الرجاء ادخال رمز التفعيل المرسل",
                               style: TextStyle(
                                   fontSize: 11,
                                   color: Color(0xffB3B3B3),
@@ -85,11 +87,11 @@ class _OtpScreenState extends State<OtpScreen> {
                             ),
                             const SizedBox(height: 16),
                             OtpFields(otpValues: viewModel.otpValues),
-
                             const SizedBox(height: 16),
-
                             viewModel.isLoading
-                                ? Center(child: CircularProgressIndicator())
+                                ? Center(child: CircularProgressIndicator(
+                              color: const Color.fromRGBO(64, 157, 220, 1),
+                            ))
                                 : SizedBox(
                               width: double.infinity,
                               height: buttonHeight,

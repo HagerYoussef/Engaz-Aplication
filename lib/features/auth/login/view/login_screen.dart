@@ -1,27 +1,73 @@
+import 'dart:convert';
+import 'package:quickalert/quickalert.dart';
 import 'package:engaz_app/features/auth/forgetPassword/view/otp_screen.dart';
 import 'package:engaz_app/features/auth/login/widgets/login_text_feild.dart';
 import 'package:engaz_app/features/auth/register/view/register_screen.dart';
 import 'package:engaz_app/features/home_screen/view/home_view.dart';
-import 'package:engaz_app/features/visitor/home_screen_2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../viewmodel/login_viewmodel.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+  static String routeName = 'Login';
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupNotification();
+  }
+
+  void _setupNotification() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    // طلب صلاحية الإشعارات
+    await messaging.requestPermission();
+
+    // إعداد flutter_local_notifications
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings =
+    InitializationSettings(android: initializationSettingsAndroid);
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  void _showLocalNotification(String title, String body) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails('login_channel', 'Login Notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: false);
+
+    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0, // ID
+      title,
+      body,
+      platformChannelSpecifics,
+    );
+  }
 
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -45,7 +91,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final String secretKey = r"h@8G$z!X9rF%2pL^vM&*sYQ1JbT7NcW5x!G3dR0PmA*Zq^vU4L&V9mY6C2H";
 
-    /// إنشاء JWT وتوقيعه بـ HS256
     final jwt = JWT({
       'uid': uid,
       'email': email,
@@ -57,16 +102,31 @@ class _LoginScreenState extends State<LoginScreen> {
 
     print("🔐 JWT Token (HS256): $signedToken");
 
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', signedToken);
-
 
     final storedToken = prefs.getString('token');
     print("📦 Stored Token from SharedPreferences: $storedToken");
 
-    return userCredential;
+    // ✅ ابعت FCM Token للباك إند
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    if (fcmToken != null) {
+      try {
+        final response = await http.post(
+          Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/login/token'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $signedToken',
+          },
+          body: jsonEncode({"token": fcmToken}),
+        );
+        print("✅ FCM token sent: ${response.statusCode} - ${response.body}");
+      } catch (e) {
+        print("❌ Error sending FCM token: $e");
+      }
+    }
 
+    return userCredential;
   }
 
   @override
@@ -151,18 +211,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     : () async {
                                         if (!formKey.currentState!.validate())
                                           return;
-
                                         final result =
                                             await viewModel.loginUser();
-
                                         if (result['success']) {
-                                          ScaffoldMessenger.of(context)
+                                          /*ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             SnackBar(
                                               content: Text(result['message']),
                                               backgroundColor: Colors.green,
                                             ),
                                           );
+                                           */
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
@@ -177,19 +236,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                           );
                                         } else {
-                                          ScaffoldMessenger.of(context)
+                                          QuickAlert.show(
+                                            context: context,
+                                            type: QuickAlertType.error,
+                                            title: 'Oops...',
+                                            text: 'Sorry, something went wrong',
+                                            confirmBtnText : 'Try Again',
+                                          );
+                                          /*ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             SnackBar(
                                               content: Text(result['message']),
                                               backgroundColor: Colors.red,
                                             ),
                                           );
+                                           */
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
                                       viewModel.loginState == LoginState.loading
-                                          ? Colors.blue.withOpacity(0.7)
+                                          ? Colors.blue
                                           : Colors.blue,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -213,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         const SizedBox(height: 12),
-                        SizedBox(
+                        /*SizedBox(
                           width: double.infinity,
                           height: buttonHeight,
                           child: OutlinedButton(
@@ -241,6 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
+                         */
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
@@ -249,21 +317,30 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () async {
                               try {
                                 await signInWithGoogle();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                /*ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
                                       content: Text("✅ تم تسجيل الدخول بجوجل")),
                                 );
+                                 */
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => HomePage()));
                               } catch (e) {
                                 print("❌ Google Sign-In Error: $e");
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                QuickAlert.show(
+                                  context: context,
+                                  type: QuickAlertType.error,
+                                  title: 'Oops...',
+                                  text: 'Sorry, something went wrong',
+                                  confirmBtnText : 'Try Again',
+                                );
+                                /*ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
                                       content:
                                           Text("❌ فشل تسجيل الدخول بجوجل")),
                                 );
+                                 */
                               }
                             },
                             style: OutlinedButton.styleFrom(

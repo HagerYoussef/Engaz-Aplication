@@ -1,23 +1,15 @@
 import 'dart:convert';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../auth/register/widgets/custom_text_feild.dart';
 import '../localization/change_lang.dart';
-import '../order_details/order_details_page.dart';
 import '../printing_request/widgets/upload_button.dart';
-import '../saved_order/view/saved_order.dart';
 import '../translation _request/widgets/delivery_options.dart';
-
-import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:open_file/open_file.dart';
 import 'dart:io';
 
 class PrinterRequestPageWithApi extends StatefulWidget {
@@ -29,10 +21,11 @@ class PrinterRequestPageWithApi extends StatefulWidget {
 
 class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
   final List<PlatformFile> selectedFiles = [];
-  final List<String> availableLanguages = ['White and Black'];
-  final List<String> availableLanguages2 = [
-    'cubed',
-  ];
+  List<Map<String, dynamic>> finalizedFiles = [];
+  final List<String> availableLanguages = ['Colored','White and Black'];
+  final List<String> availableLanguages2 = ['cubed'];
+  List<Map<String, dynamic>> fileDetails = [];
+
   String? deliveryMethod;
   String? selectedAddress;
   String? selectedLanguage;
@@ -52,7 +45,13 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
       if (result != null && result.files.isNotEmpty) {
         setState(() {
-          selectedFiles.add(result.files.first);
+          if (selectedFiles.length >= 1) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('يمكنك رفع ملف واحد فقط في كل مرة.')),
+            );
+          } else {
+            selectedFiles.add(result.files.first);
+          }
         });
       }
     } catch (e) {
@@ -64,14 +63,9 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    if (selectedFiles.isEmpty ||
-        selectedLanguage == null ||
-        selectedLanguage2 == null ||
-        _pagesController.text.isEmpty ||
-        _copiesController.text.isEmpty ||
-        deliveryMethod == null) {
+    if (finalizedFiles.isEmpty || deliveryMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء ملء جميع الحقول المطلوبة')),
+        const SnackBar(content: Text('يرجى إضافة الملفات واختيار وسيلة التوصيل')),
       );
       return;
     }
@@ -83,33 +77,32 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
         'POST',
         Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/printing'),
       );
-//تست123
 
-      request.headers['Authorization'] =
-      'Bearer $token';      request.headers['Content-Type'] = 'multipart/form-data';
+      // لا تضف Content-Type يدويًا!
+      request.headers['Authorization'] = 'Bearer $token';
 
-      for (var file in selectedFiles) {
-        if (file.path != null) {
+      List<Map<String, dynamic>> detailsList = [];
+
+      for (var fileData in finalizedFiles) {
+        PlatformFile file = fileData['file'];
+
+        if (file.path != null && File(file.path!).existsSync()) {
           request.files.add(await http.MultipartFile.fromPath(
             'otherDocs',
             file.path!,
           ));
-        }
-      }
 
-      List<Map<String, dynamic>> detailsList = [];
-      if (detailsList.length > 2) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('لا يجب رفع اكتر من ملفين')),
-        );
-      }
-      for (int i = 0; i < selectedFiles.length; i++) {
-        detailsList.add({
-          "color": selectedLanguage,
-          "cover": selectedLanguage2,
-          "pages": int.tryParse(_pagesController.text) ?? 0,
-          "copies": int.tryParse(_copiesController.text) ?? 0,
-        });
+          detailsList.add({
+            "color": fileData['color'],
+            "cover": fileData['cover'],
+            "pages": fileData['pages'],
+            "copies": fileData['copies'],
+          });
+
+          print('📤 File added: ${file.name}');
+        } else {
+          print('⚠️ ملف غير موجود فعليًا: ${file.name}');
+        }
       }
 
       request.fields['details'] = jsonEncode(detailsList);
@@ -128,20 +121,20 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم الرفع بنجاح')),
+          const SnackBar(content: Text('تم إرسال الطلب بنجاح')),
         );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => SaveOrder()),
         );
       } else {
-        print('response body :$responseBody');
+        print('🔴 خطأ في الاستجابة: $responseBody');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('خطأ: ${response.statusCode} - $responseBody')),
+          SnackBar(content: Text('خطأ: ${response.statusCode} - $responseBody')),
         );
       }
     } catch (e) {
+      print('❌ استثناء أثناء الإرسال: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('حدث خطأ: $e')),
       );
@@ -265,6 +258,19 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
         ),
       ],
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fileDetails = selectedFiles
+        .map((file) => {
+      'pages': TextEditingController(),
+      'copies': TextEditingController(),
+      'color': null,
+      'cover': null,
+    })
+        .toList();
   }
 
   @override
@@ -439,12 +445,55 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  InkWell(
+                  /*InkWell(
                     onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => const SavedAddress())),
                     child: Image.asset("assets/images/img51.png"),
+                  ),
+                   */
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.add),
+                      label: const Text("إضافة الملف"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff409EDC),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {
+                        if (selectedFiles.isNotEmpty &&
+                            selectedLanguage != null &&
+                            selectedLanguage2 != null &&
+                            _pagesController.text.isNotEmpty &&
+                            _copiesController.text.isNotEmpty) {
+                          finalizedFiles.add({
+                            "file": selectedFiles.first,
+                            "color": selectedLanguage,
+                            "cover": selectedLanguage2,
+                            "pages": int.tryParse(_pagesController.text) ?? 0,
+                            "copies": int.tryParse(_copiesController.text) ?? 0,
+                          });
+
+                          setState(() {
+                            selectedFiles.clear();
+                            selectedLanguage = null;
+                            selectedLanguage2 = null;
+                            _pagesController.clear();
+                            _copiesController.clear();
+                          });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('تمت إضافة الملف، يمكنك رفع ملف جديد')),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('يرجى ملء جميع البيانات قبل الإضافة')),
+                          );
+                        }
+                      },
+                    ),
                   ),
                   const SizedBox(height: 16),
                   _buildSummaryCard(),

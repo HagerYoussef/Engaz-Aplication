@@ -1,8 +1,11 @@
-import 'package:engaz_app/features/auth/forgetPassword/view/otp2_screen.dart';
+import 'package:engaz_app/features/auth/forgetPassword/view/otp_screen.dart';
 import 'package:engaz_app/features/auth/register/widgets/custom_text_feild.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
+import '../../forgetPassword/view/otp_screen2.dart';
 import '../../login/viewmodel/login_viewmodel.dart';
 import '../../login/view/login_screen.dart';
 
@@ -21,7 +24,6 @@ class RegisterScreen extends StatelessWidget {
           double padding = screenWidth > 600 ? 48 : 24;
           double imageWidth = screenWidth > 600 ? 250 : 204;
           double buttonHeight = screenWidth > 600 ? 60 : 50;
-
           return Stack(
             children: [
               SingleChildScrollView(
@@ -55,7 +57,6 @@ class RegisterScreen extends StatelessWidget {
                               fontFamily: 'IBM_Plex_Sans_Arabic'),
                         ),
                         const SizedBox(height: 16),
-
                         const Text(
                           "الاسم الاول",
                           style: TextStyle(
@@ -122,28 +123,32 @@ class RegisterScreen extends StatelessWidget {
                               height: buttonHeight,
                               child: ElevatedButton(
                                 onPressed: viewModel.registerState == RegisterState.loading
-                                    ? (){}
+                                    ? () {}
                                     : () async {
                                   if (!formKey.currentState!.validate()) return;
 
                                   final result = await viewModel.registerUser(context);
 
                                   if (result['success']) {
+                                    final String userId = result['user'];
+                                    final String contactInfo = viewModel.email; // أو viewModel.phone حسب اللي بتعرضه
+
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => OtpScreen2(
-                                          phone: viewModel.phone,
-                                          email: viewModel.email,
+                                          contactInfo: contactInfo,
+                                          userId: userId,
                                         ),
                                       ),
                                     );
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(result['message']),
-                                        backgroundColor: Colors.red,
-                                      ),
+                                    QuickAlert.show(
+                                      context: context,
+                                      type: QuickAlertType.error,
+                                      title: 'Oops...',
+                                      text: 'Sorry, something went wrong',
+                                      confirmBtnText: 'Try Again',
                                     );
                                   }
                                 },
@@ -168,7 +173,6 @@ class RegisterScreen extends StatelessWidget {
                             );
                           },
                         ),
-
 
                         const SizedBox(height: 12),
                         Text.rich(TextSpan(
