@@ -1,26 +1,44 @@
 {
   "project_info": {
-    "project_number": "205532306300",
-    "project_id": "enjaz-c30ae",
-    "storage_bucket": "enjaz-c30ae.firebasestorage.app"
+    "project_number": "516153415128",
+    "project_id": "engaz-app-2",
+    "storage_bucket": "engaz-app-2.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:205532306300:android:97d77604d723f655fe22f9",
+        "mobilesdk_app_id": "1:516153415128:android:52be65201d3e1052518ead",
         "android_client_info": {
           "package_name": "com.example.engaz_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "516153415128-nb1pq6ihh6b0tti500p85noh1rqtbdmf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.engaz_app",
+            "certificate_hash": "2b0b77e29bda5b64b9d1b1bcf309cae2bf7a12b2"
+          }
+        },
+        {
+          "client_id": "516153415128-ifac12mkt4n41e175b58itbmtl2tm5sk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBWvoJbKVcWjSsfN3MDs_if2PlMzaZrhDk"
+          "current_key": "AIzaSyCKdv1gstwGZaR51ZeW-IOgFNJV8ufVCvo"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "516153415128-ifac12mkt4n41e175b58itbmtl2tm5sk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

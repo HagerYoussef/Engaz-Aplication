@@ -1,9 +1,9 @@
-import 'package:engaz_app/features/auth/forgetPassword/view/otp2_screen.dart';
 import 'package:engaz_app/features/auth/register/widgets/custom_text_feild.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../localization/change_lang.dart';
+import '../../forgetPassword/view/otp_screen2.dart';
 import '../../login/viewmodel/login_viewmodel.dart';
 import '../../login/view/login_screen.dart';
 
@@ -75,7 +75,7 @@ class RegisterScreen extends StatelessWidget {
                         _buildLabel(Translations.getText('first_name', langCode), langCode),
                         CustomTextField(
                           hintText: Translations.getText('enter_first_name', langCode),
-                            onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
+                          onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
                               .setFirstName(value),
                         ),
                         const SizedBox(height: 8),
@@ -84,7 +84,7 @@ class RegisterScreen extends StatelessWidget {
                         _buildLabel(Translations.getText('last_name', langCode), langCode),
                         CustomTextField(
                           hintText: Translations.getText('enter_last_name', langCode),
-                           onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
+                          onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
                               .setLastName(value),
                         ),
                         const SizedBox(height: 8),
@@ -93,7 +93,7 @@ class RegisterScreen extends StatelessWidget {
                         _buildLabel(Translations.getText('phone_number', langCode), langCode),
                         CustomTextField(
                           hintText: Translations.getText('enter_phone', langCode),
-                             onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
+                          onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
                               .setPhone(value),
                         ),
                         const SizedBox(height: 8),
@@ -102,7 +102,7 @@ class RegisterScreen extends StatelessWidget {
                         _buildLabel(Translations.getText('email', langCode), langCode),
                         CustomTextField(
                           hintText: Translations.getText('enter_email', langCode),
-                           onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
+                          onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
                               .setEmail(value),
                         ),
                         const SizedBox(height: 16),
@@ -124,8 +124,8 @@ class RegisterScreen extends StatelessWidget {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => OtpScreen2(
-                                          phone: viewModel.phone,
-                                          email: viewModel.email,
+                                          contactInfo: viewModel.phone,
+                                          userId: viewModel.email,
                                         ),
                                       ),
                                     );

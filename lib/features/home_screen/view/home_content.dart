@@ -57,7 +57,7 @@ class HomeContent extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
                             const Text(
-                              'مرحباً محمد!',
+                              'مرحباً!',
                               style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,

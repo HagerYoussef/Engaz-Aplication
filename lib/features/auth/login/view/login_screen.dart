@@ -88,222 +88,222 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Form(
                     key: formKey,
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                    SizedBox(height: screenWidth > 600 ? 150 : 130),
-                    Image.asset('assets/images/img1.png',
-                        width: imageWidth, height: imageWidth * 0.37),
-                    const SizedBox(height: 16),
-                    Text(
-                      Translations.getText('login', langCode),
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'IBM_Plex_Sans_Arabic'),
-                    ),
-                    Text(
-                      Translations.getText('choose_method', langCode),
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xffB3B3B3),
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'IBM_Plex_Sans_Arabic'),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        SizedBox(height: screenWidth > 600 ? 150 : 130),
+                        Image.asset('assets/images/img1.png',
+                            width: imageWidth, height: imageWidth * 0.37),
+                        const SizedBox(height: 16),
+                        Text(
+                          Translations.getText('login', langCode),
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'IBM_Plex_Sans_Arabic'),
+                        ),
+                        Text(
+                          Translations.getText('choose_method', langCode),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xffB3B3B3),
+                              fontWeight: FontWeight.w500,
+                              fontFamily: 'IBM_Plex_Sans_Arabic'),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Consumer<LoginViewModel>(
+                              builder: (context, viewModel, child) {
+                                return _buildToggleButton(
+                                  title: Translations.getText('email', langCode),
+                                  isSelected: !viewModel.isPhoneSelected,
+                                  onTap: viewModel.toggleLoginMethod,
+                                );
+                              },
+                            ),
+                            Consumer<LoginViewModel>(
+                              builder: (context, viewModel, child) {
+                                return _buildToggleButton(
+                                  title: Translations.getText('phone', langCode),
+                                  isSelected: viewModel.isPhoneSelected,
+                                  onTap: viewModel.toggleLoginMethod,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const LoginTextField(),
+                        const SizedBox(height: 16),
                         Consumer<LoginViewModel>(
-                          builder: (context, viewModel, child) {
-                            return _buildToggleButton(
-                              title: Translations.getText('email', langCode),
-                              isSelected: !viewModel.isPhoneSelected,
-                              onTap: viewModel.toggleLoginMethod,
+                          builder: (context, viewModel, _) {
+                            return SizedBox(
+                              width: double.infinity,
+                              height: buttonHeight,
+                              child: ElevatedButton(
+                                onPressed: viewModel.loginState == LoginState.loading
+                                    ? () {}
+                                    : () async {
+                                  if (!formKey.currentState!.validate()) return;
+
+                                  final result = await viewModel.loginUser();
+
+                                  if (result['success']) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(result['message']),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OtpScreen(
+                                          contactInfo: viewModel.userInput,
+                                          contactType: viewModel.isPhoneSelected ? 'phone' : 'email',
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(result['message']),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: viewModel.loginState == LoginState.loading
+                                      ? Colors.blue.withOpacity(0.7)
+                                      : Colors.blue,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: viewModel.loginState == LoginState.loading
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : Text(
+                                  Translations.getText('login', langCode),
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'IBM_Plex_Sans_Arabic',
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
                             );
                           },
                         ),
-                        Consumer<LoginViewModel>(
-                          builder: (context, viewModel, child) {
-                            return _buildToggleButton(
-                              title: Translations.getText('phone', langCode),
-                              isSelected: viewModel.isPhoneSelected,
-                              onTap: viewModel.toggleLoginMethod,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const LoginTextField(),
-                    const SizedBox(height: 16),
-                    Consumer<LoginViewModel>(
-                      builder: (context, viewModel, _) {
-                        return SizedBox(
+                        const SizedBox(height: 12),
+                        SizedBox(
                           width: double.infinity,
                           height: buttonHeight,
-                          child: ElevatedButton(
-                            onPressed: viewModel.loginState == LoginState.loading
-                                ? () {}
-                                : () async {
-                              if (!formKey.currentState!.validate()) return;
-
-                              final result = await viewModel.loginUser();
-
-                              if (result['success']) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(result['message']),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                                Navigator.push(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => OtpScreen(
-                                      contactInfo: viewModel.userInput,
-                                      contactType: viewModel.isPhoneSelected ? 'phone' : 'email',
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(result['message']),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
+                                      builder: (context) => HomePage2()));
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: viewModel.loginState == LoginState.loading
-                                  ? Colors.blue.withOpacity(0.7)
-                                  : Colors.blue,
+                            style: OutlinedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
+                              side: const BorderSide(
+                                  color: Color(0xff409EDC), width: 1),
                             ),
-                            child: viewModel.loginState == LoginState.loading
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : Text(
-                              Translations.getText('login', langCode),
+                            child: Text(
+                              Translations.getText('guest', langCode),
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                                 fontFamily: 'IBM_Plex_Sans_Arabic',
-                                color: Colors.white,
+                                color: Color(0xff409EDC),
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: buttonHeight,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => HomePage2()));
-                        },
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          side: const BorderSide(
-                              color: Color(0xff409EDC), width: 1),
                         ),
-                        child: Text(
-                          Translations.getText('guest', langCode),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'IBM_Plex_Sans_Arabic',
-                            color: Color(0xff409EDC),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: buttonHeight,
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          try {
-                            await signInWithGoogle();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(Translations.getText('google_success', langCode))),
-                            );
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HomePage()));
-                          } catch (e) {
-                            print("❌ Google Sign-In Error: $e");
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(Translations.getText('google_error', langCode))),
-                            );
-                          }
-                        },
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          side: const BorderSide(
-                            color: Color(0xff409EDC),
-                            width: 1,
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: buttonHeight,
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              try {
+                                await signInWithGoogle();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(Translations.getText('google_success', langCode))),
+                                );
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomePage()));
+                              } catch (e) {
+                                print("❌ Google Sign-In Error: $e");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(Translations.getText('google_error', langCode))),
+                                );
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: const BorderSide(
+                                color: Color(0xff409EDC),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              Translations.getText('google_login', langCode),
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'IBM_Plex_Sans_Arabic',
+                                color: Color(0xff409EDC),
+                              ),
+                            ),
                           ),
                         ),
-                        child: Text(
-                          Translations.getText('google_login', langCode),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'IBM_Plex_Sans_Arabic',
-                            color: Color(0xff409EDC),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text.rich(
-                      TextSpan(
-                          text: Translations.getText('no_account', langCode) + " ",
-                          style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
-                          children: [
-                      TextSpan(
-                      text: Translations.getText('signup', langCode),
-                      style: TextStyle(
-                          color: Color(0xff409EDC),
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'IBM_Plex_Sans_Arabic'),
+                        const SizedBox(height: 12),
+                        Text.rich(
+                          TextSpan(
+                            text: Translations.getText('no_account', langCode) + " ",
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'IBM_Plex_Sans_Arabic'),
+                            children: [
+                              TextSpan(
+                                text: Translations.getText('signup', langCode),
+                                style: TextStyle(
+                                    color: Color(0xff409EDC),
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'IBM_Plex_Sans_Arabic'),
 
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                              const RegisterScreen()),
-                        );
-                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                          const RegisterScreen()),
+                                    );
+                                  },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  ],
                 ),
               ),
-            ],
-          ),
-          ),
-          ),
-          ),
               Positioned(
                 top: 60,
                 left: padding,
@@ -318,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: screenWidth > 600 ? 40 : 33),
                 ),
               ),
-          ],
+            ],
           );
         },
       ),
