@@ -112,7 +112,7 @@ class AddAddressScreen extends StatelessWidget {
                               const SizedBox(height: 8),
                               TextField(
                                 controller: model.locationController,
-                                readOnly: true,
+
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: Colors.grey[200],
