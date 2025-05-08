@@ -1,8 +1,11 @@
+import 'package:engaz_app/features/auth/forgetPassword/view/otp_screen.dart';
 import 'package:engaz_app/features/auth/register/widgets/custom_text_feild.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../localization/change_lang.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 import '../../forgetPassword/view/otp_screen2.dart';
 import '../../login/viewmodel/login_viewmodel.dart';
 import '../../login/view/login_screen.dart';
@@ -23,7 +26,6 @@ class RegisterScreen extends StatelessWidget {
           double padding = screenWidth > 600 ? 48 : 24;
           double imageWidth = screenWidth > 600 ? 250 : 204;
           double buttonHeight = screenWidth > 600 ? 60 : 50;
-
           return Stack(
             children: [
               SingleChildScrollView(
@@ -73,6 +75,13 @@ class RegisterScreen extends StatelessWidget {
 
                         // First Name
                         _buildLabel(Translations.getText('first_name', langCode), langCode),
+                        const Text(
+                          "الاسم الاول",
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'IBM_Plex_Sans_Arabic'),
+                        ),
                         CustomTextField(
                           hintText: Translations.getText('enter_first_name', langCode),
                           onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
@@ -116,25 +125,32 @@ class RegisterScreen extends StatelessWidget {
                               child: ElevatedButton(
                                 onPressed: viewModel.registerState == RegisterState.loading
                                     ? null
+                                    ? () {}
                                     : () async {
                                   if (!formKey.currentState!.validate()) return;
                                   final result = await viewModel.registerUser(context);
                                   if (result['success']) {
+                                    final String userId = result['user'];
+                                    final String contactInfo = viewModel.email; // أو viewModel.phone حسب اللي بتعرضه
+
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => OtpScreen2(
                                           contactInfo: viewModel.phone,
                                           userId: viewModel.email,
+                                          contactInfo: contactInfo,
+                                          userId: userId,
                                         ),
                                       ),
                                     );
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(result['message']),
-                                        backgroundColor: Colors.red,
-                                      ),
+                                    QuickAlert.show(
+                                      context: context,
+                                      type: QuickAlertType.error,
+                                      title: 'Oops...',
+                                      text: 'Sorry, something went wrong',
+                                      confirmBtnText: 'Try Again',
                                     );
                                   }
                                 },

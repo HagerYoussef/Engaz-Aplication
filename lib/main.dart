@@ -131,6 +131,11 @@ class MyApp extends StatelessWidget {
       //   '/login': (context) => const LoginScreen(),
       //   '/translate': (context) =>  TranslationOrderApp(),
       // },
+      home: const SplashScreen(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/translate': (context) =>  TranslationOrderApp(),
+      },
     );
   }
 }
