@@ -3,6 +3,7 @@ import 'package:engaz_app/features/auth/register/widgets/custom_text_feild.dart'
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../localization/change_lang.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import '../../forgetPassword/view/otp_screen2.dart';
@@ -15,6 +16,7 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    final langCode = context.watch<LocalizationProvider>().locale.languageCode;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -33,30 +35,46 @@ class RegisterScreen extends StatelessWidget {
                   child: Form(
                     key: formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: langCode == 'ar'
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
                       children: [
                         SizedBox(height: screenWidth > 600 ? 150 : 130),
                         Center(
-                          child: Image.asset('assets/images/img1.png',
-                              width: imageWidth, height: imageWidth * 0.37),
+                          child: Image.asset(
+                            'assets/images/img1.png',
+                            width: imageWidth,
+                            height: imageWidth * 0.37,
+                          ),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          "انشاء حساب جديد",
-                          style: TextStyle(
+                        Center(
+                          child: Text(
+                            Translations.getText('create_account', langCode),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
+                              fontFamily: 'IBM_Plex_Sans_Arabic',
+                            ),
+                          ),
                         ),
-                        const Text(
-                          "الرجاء ملئ البيانات التالية لانشاء حسابك",
-                          style: TextStyle(
+                        Center(
+                          child: Text(
+                            Translations.getText('fill_details', langCode),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xffB3B3B3),
                               fontWeight: FontWeight.w500,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
+                              fontFamily: 'IBM_Plex_Sans_Arabic',
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 16),
+
+                        // First Name
+                        _buildLabel(Translations.getText('first_name', langCode), langCode),
                         const Text(
                           "الاسم الاول",
                           style: TextStyle(
@@ -65,57 +83,40 @@ class RegisterScreen extends StatelessWidget {
                               fontFamily: 'IBM_Plex_Sans_Arabic'),
                         ),
                         CustomTextField(
-                            hintText: 'ادخل الاسم الاول',
-                            onChanged: (value) => Provider.of<LoginViewModel>(
-                                context,
-                                listen: false)
-                                .setFirstName(value)),
-                        const SizedBox(height: 8),
-                        const Text(
-                          "اسم العائله",
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
+                          hintText: Translations.getText('enter_first_name', langCode),
+                          onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
+                              .setFirstName(value),
                         ),
+                        const SizedBox(height: 8),
+
+                        // Last Name
+                        _buildLabel(Translations.getText('last_name', langCode), langCode),
                         CustomTextField(
-                          hintText: 'ادخل اسم العائلة',
-                          onChanged: (value) => Provider.of<LoginViewModel>(
-                              context,
-                              listen: false)
+                          hintText: Translations.getText('enter_last_name', langCode),
+                          onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
                               .setLastName(value),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          "رقم الجوال",
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
-                        ),
+
+                        // Phone Number
+                        _buildLabel(Translations.getText('phone_number', langCode), langCode),
                         CustomTextField(
-                          hintText: 'ادخل رقم الجوال',
-                          onChanged: (value) => Provider.of<LoginViewModel>(
-                              context,
-                              listen: false)
+                          hintText: Translations.getText('enter_phone', langCode),
+                          onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
                               .setPhone(value),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          "البريد الالكتروني",
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'IBM_Plex_Sans_Arabic'),
-                        ),
+
+                        // Email
+                        _buildLabel(Translations.getText('email', langCode), langCode),
                         CustomTextField(
-                          hintText: 'ادخل البريد الإلكتروني',
-                          onChanged: (value) => Provider.of<LoginViewModel>(
-                              context,
-                              listen: false)
+                          hintText: Translations.getText('enter_email', langCode),
+                          onChanged: (value) => Provider.of<LoginViewModel>(context, listen: false)
                               .setEmail(value),
                         ),
                         const SizedBox(height: 16),
+
+                        // Signup Button
                         Consumer<LoginViewModel>(
                           builder: (context, viewModel, _) {
                             return SizedBox(
@@ -123,12 +124,11 @@ class RegisterScreen extends StatelessWidget {
                               height: buttonHeight,
                               child: ElevatedButton(
                                 onPressed: viewModel.registerState == RegisterState.loading
+                                    ? null
                                     ? () {}
                                     : () async {
                                   if (!formKey.currentState!.validate()) return;
-
                                   final result = await viewModel.registerUser(context);
-
                                   if (result['success']) {
                                     final String userId = result['user'];
                                     final String contactInfo = viewModel.email; // أو viewModel.phone حسب اللي بتعرضه
@@ -137,6 +137,8 @@ class RegisterScreen extends StatelessWidget {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => OtpScreen2(
+                                          contactInfo: viewModel.phone,
+                                          userId: viewModel.email,
                                           contactInfo: contactInfo,
                                           userId: userId,
                                         ),
@@ -160,9 +162,9 @@ class RegisterScreen extends StatelessWidget {
                                 ),
                                 child: viewModel.registerState == RegisterState.loading
                                     ? const CircularProgressIndicator(color: Colors.white)
-                                    : const Text(
-                                  "تسجيل",
-                                  style: TextStyle(
+                                    : Text(
+                                  Translations.getText('signup', langCode),
+                                  style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
                                     fontFamily: 'IBM_Plex_Sans_Arabic',
@@ -173,35 +175,10 @@ class RegisterScreen extends StatelessWidget {
                             );
                           },
                         ),
-
                         const SizedBox(height: 12),
-                        Text.rich(TextSpan(
-                          text: "لديك حساب بالفعل؟ ",
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'IBM_Plex_Sans_Arabic',
-                          ),
-                          children: [
-                            TextSpan(
-                              text: "تسجيل الدخول",
-                              style: const TextStyle(
-                                color: Color(0xff409EDC),
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'IBM_Plex_Sans_Arabic',
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                        const LoginScreen()),
-                                  );
-                                },
-                            ),
-                          ],
-                        )),
+
+                        // Login Link
+                        _buildLoginLink(context, langCode),
                       ],
                     ),
                   ),
@@ -209,37 +186,18 @@ class RegisterScreen extends StatelessWidget {
               ),
               Positioned(
                 top: 60,
-                left: padding,
-                child: SizedBox(
-                  width: screenWidth * .9,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Image.asset(
-                        'assets/images/img2.png',
-                        width: screenWidth > 600 ? 120 : 98,
-                        height: screenWidth > 600 ? 40 : 33,
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "حساب جديد",
-                            style: TextStyle(
-                              color: Color(0xff1D1D1D),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
-                              fontFamily: 'IBM_Plex_Sans_Arabic',
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Icon(Icons.arrow_forward_ios),
-                          ),
-                        ],
-                      ),
-                    ],
+                left: 24,
+
+                child: GestureDetector(
+                  onTap: () {
+                    final currentLang = context.read<LocalizationProvider>().locale.languageCode;
+                    final newLang = currentLang == 'ar' ? 'en' : 'ar';
+                    context.read<LocalizationProvider>().setLocale(Locale(newLang));
+                  },
+                  child: Image.asset(
+                    'assets/images/img2.png',
+                    width: screenWidth > 600 ? 120 : 98,
+                    height: screenWidth > 600 ? 40 : 33,
                   ),
                 ),
               ),
@@ -249,4 +207,53 @@ class RegisterScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildLabel(String text, String langCode) {
+    return Align(
+      alignment: langCode == 'ar' ? Alignment.centerRight : Alignment.centerLeft,
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'IBM_Plex_Sans_Arabic',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginLink(BuildContext context, String langCode) {
+    return Align(
+      alignment: langCode == 'ar' ? Alignment.centerRight : Alignment.centerLeft,
+      child: Text.rich(
+        TextSpan(
+          text: Translations.getText('have_account', langCode) + " ",
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'IBM_Plex_Sans_Arabic',
+          ),
+          children: [
+            TextSpan(
+              text: Translations.getText('login', langCode),
+              style: const TextStyle(
+                color: Color(0xff409EDC),
+                fontWeight: FontWeight.w600,
+                fontFamily: 'IBM_Plex_Sans_Arabic',
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  );
+                },
+            ),
+          ],
+        ),
+        textAlign: langCode == 'ar' ? TextAlign.right : TextAlign.left,
+      ),
+    );
+  }
+
 }

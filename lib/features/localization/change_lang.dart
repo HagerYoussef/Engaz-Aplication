@@ -145,7 +145,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
 }
 
 class LocalizationProvider extends ChangeNotifier {
-  Locale _locale = Locale('en');
+  Locale _locale = Locale('ar');
 
   Locale get locale => _locale;
 
@@ -158,6 +158,16 @@ class LocalizationProvider extends ChangeNotifier {
 class Translations {
   static Map<String, Map<String, String>> translations = {
     'en': {
+      'create_account': 'Create New Account',
+      'fill_details': 'Please fill in the details to create your account',
+      'first_name': 'First Name',
+      'enter_first_name': 'Enter first name',
+      'last_name': 'Last Name',
+      'enter_last_name': 'Enter last name',
+      'phone_number': 'Phone Number',
+      'enter_phone': 'Enter phone number',
+      'enter_email': 'Enter email address',
+      'have_account': 'Already have an account?',
       "appTitle": "My App",
       "language": "Language",
       "confirm": "Confirm",
@@ -236,6 +246,17 @@ class Translations {
       "num4": "Number of copies to print",
       "num3": "Number of copies",
       "no": "Notes",
+      'login': 'Login',
+      'choose_method': 'Please choose your preferred login method',
+      'email': 'Email',
+      'phone': 'Phone',
+      'guest': 'Continue as Guest',
+      'google_login': 'Sign in with Google',
+      'no_account': "Don't have an account?",
+      'signup': 'Sign Up',
+      'google_success': '✅ Signed in with Google successfully',
+      'google_error': '❌ Failed to sign in with Google',
+
       "en": "Enter your notes if any.",
       "se": "Send",
       "dis": "Discount code",
@@ -294,11 +315,31 @@ class Translations {
 
     },
     'ar': {
+      'login': 'تسجيل الدخول',
+      'choose_method': 'الرجاء اختيار وسيلة تسجيل الدخول المناسبة لك',
+      'email': 'البريد الإلكتروني',
+      'phone': 'رقم الجوال',
+      'guest': 'الاستمرار كزائر',
+      'google_login': 'تسجيل الدخول بجوجل',
+      'no_account': 'لا املك حساب؟',
+      'signup': 'تسجيل جديد',
+      'google_success': '✅ تم تسجيل الدخول بجوجل',
+      'google_error': '❌ فشل تسجيل الدخول بجوجل',
       "appTitle": "تطبيقي",
       "language": "لغة التطبيق",
       "confirm": "تأكيد",
       "arabic": "اللغة العربية",
       "english": "الإنجليزية",
+      'create_account': 'انشاء حساب جديد',
+      'fill_details': 'الرجاء ملئ البيانات التالية لانشاء حسابك',
+      'first_name': 'الاسم الاول',
+      'enter_first_name': 'ادخل الاسم الاول',
+      'last_name': 'اسم العائله',
+      'enter_last_name': 'ادخل اسم العائلة',
+      'phone_number': 'رقم الجوال',
+      'enter_phone': 'ادخل رقم الجوال',
+      'enter_email': 'ادخل البريد الإلكتروني',
+      'have_account': 'لديك حساب بالفعل؟ ',
       'profile': 'الملف الشخصي',
       'addresses': 'عناويني',
       'general_settings': 'إعدادات عامة',
