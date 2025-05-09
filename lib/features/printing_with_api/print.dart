@@ -6,7 +6,7 @@ import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../auth/register/widgets/custom_text_feild.dart';
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 import '../printing_request/widgets/upload_button.dart';
 import '../translation _request/widgets/delivery_options.dart';
 import 'package:http/http.dart' as http;
@@ -22,19 +22,20 @@ class PrinterRequestPageWithApi extends StatefulWidget {
 class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
   final List<PlatformFile> selectedFiles = [];
   List<Map<String, dynamic>> finalizedFiles = [];
-  final List<String> availableLanguages = ['Colored','White and Black'];
-  final List<String> availableLanguages2 = ['cubed'];
+  List<String> availableLanguages = [];
+  bool isLoadingColors = true;
+  List<String> availableLanguages2 = [];
   List<Map<String, dynamic>> fileDetails = [];
-
+  String? address;
   String? deliveryMethod;
   String? selectedAddress;
   String? selectedLanguage;
   String? selectedLanguage2;
   bool _isLoading = false;
 
-  final TextEditingController _pagesController = TextEditingController();
   final TextEditingController _copiesController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+
   TextDirection getTextDirection(BuildContext context) {
     String languageCode = context.read<LocalizationProvider>().locale.languageCode;
     return languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr;
@@ -78,7 +79,6 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
         Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/order/printing'),
       );
 
-      // لا تضف Content-Type يدويًا!
       request.headers['Authorization'] = 'Bearer $token';
 
       List<Map<String, dynamic>> detailsList = [];
@@ -95,7 +95,6 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
           detailsList.add({
             "color": fileData['color'],
             "cover": fileData['cover'],
-            "pages": fileData['pages'],
             "copies": fileData['copies'],
           });
 
@@ -192,9 +191,6 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              if (_pagesController.text.isNotEmpty)
-                                _buildSummaryItem(
-                                    'عدد الصفحات', _pagesController.text),
                               if (_copiesController.text.isNotEmpty)
                                 _buildSummaryItem(
                                     'عدد النسخ', _copiesController.text),
@@ -260,9 +256,68 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
     );
   }
 
+  Future<List<String>> fetchColors() async {
+    final response = await http.get(Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/dashboard/color'));
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      final List colors = body['printingcolors'];
+      return colors.map((e) => e['color'].toString()).toList();
+    } else {
+      throw Exception('Failed to load colors');
+    }
+  }
+
+  Future<List<String>> fetchCovers() async {
+    final response = await http.get(Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/dashboard/cover'));
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      final List covers = body['printngcover'];
+      return covers.map((e) => e['name'].toString()).toList();
+    } else {
+      throw Exception('Failed to load covers');
+    }
+  }
+
+  Future<List<String>> fetchLanguages() async {
+    final response = await http.get(Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/dashboard/languge'));
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      final List langs = body['langugescosts'];
+      return langs.map((e) => e['name'].toString()).toList();
+    } else {
+      throw Exception('Failed to load languages');
+    }
+  }
+
+
   @override
   void initState() {
     super.initState();
+    // تحميل الألوان
+    fetchColors().then((colors) {
+      setState(() {
+        availableLanguages = colors; // ← ألوان الطباعة
+      });
+    }).catchError((error) {
+      print('❌ Error loading colors: $error');
+    });
+
+    // تحميل الأغلفة
+    fetchCovers().then((covers) {
+      setState(() {
+        availableLanguages2 = covers; // ← التغليف
+      });
+    }).catchError((error) {
+      print('❌ Error loading covers: $error');
+    });
+
+    // لو عايز كمان تجيب لغات الترجمة مثلاً:
+    fetchLanguages().then((langs) {
+      // لو في متغير تالت مثلا: availableLangChoices
+      print('✅ لغات الترجمة المحملة: $langs');
+    }).catchError((error) {
+      print('❌ Error loading languages: $error');
+    });
     fileDetails = selectedFiles
         .map((file) => {
       'pages': TextEditingController(),
@@ -355,17 +410,16 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
                   _buildSelectedFilesList(),
                   const SizedBox(height: 16),
                   _buildDropdown(
-                      Translations.getText(
-                        'cho',
-                        context
-                            .read<LocalizationProvider>()
-                            .locale
-                            .languageCode,
-                      ),
-                      availableLanguages,
-                      selectedLanguage, (value) {
-                    setState(() => selectedLanguage = value);
-                  }),
+                    Translations.getText(
+                      'cho',
+                      context.read<LocalizationProvider>().locale.languageCode,
+                    ),
+                    availableLanguages,
+                    selectedLanguage,
+                        (value) {
+                      setState(() => selectedLanguage = value);
+                    },
+                  ),
                   _buildDropdown(
                       Translations.getText(
                         'cho2',
@@ -378,39 +432,6 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
                       selectedLanguage2, (value) {
                     setState(() => selectedLanguage2 = value);
                   }),
-                  const SizedBox(height: 16),
-                  Text(
-                      Translations.getText(
-                        'num',
-                        context
-                            .read<LocalizationProvider>()
-                            .locale
-                            .languageCode,
-                      ),
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  TextField(
-                    controller: _pagesController,
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => setState(() {}),
-                    decoration: InputDecoration(
-                      hintText: Translations.getText(
-                        'num2',
-                        context
-                            .read<LocalizationProvider>()
-                            .locale
-                            .languageCode,
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xffF2F2F2),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 16),
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   Text(
                       Translations.getText(
@@ -455,24 +476,23 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
                    */
                   Align(
                     alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.add),
-                      label: const Text("إضافة الملف"),
+                    child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(16),
                         backgroundColor: const Color(0xff409EDC),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        foregroundColor: Colors.white,
                       ),
+                      child: const Icon(Icons.add, size: 24),
                       onPressed: () {
                         if (selectedFiles.isNotEmpty &&
                             selectedLanguage != null &&
                             selectedLanguage2 != null &&
-                            _pagesController.text.isNotEmpty &&
                             _copiesController.text.isNotEmpty) {
                           finalizedFiles.add({
                             "file": selectedFiles.first,
                             "color": selectedLanguage,
                             "cover": selectedLanguage2,
-                            "pages": int.tryParse(_pagesController.text) ?? 0,
                             "copies": int.tryParse(_copiesController.text) ?? 0,
                           });
 
@@ -480,7 +500,6 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
                             selectedFiles.clear();
                             selectedLanguage = null;
                             selectedLanguage2 = null;
-                            _pagesController.clear();
                             _copiesController.clear();
                           });
 
@@ -495,15 +514,15 @@ class _PrinterRequestPageState extends State<PrinterRequestPageWithApi> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 16),
                   _buildSummaryCard(),
                   const SizedBox(height: 16),
-                  DeliveryOptions(
-                    onDeliveryMethodSelected: (method) =>
-                        setState(() => deliveryMethod = method),
-                    onAddressSelected: (address) =>
-                        setState(() => selectedAddress = address),
-                  ),
+              DeliveryOptions(
+                selectedMethod: deliveryMethod,
+                onDeliveryMethodSelected: (method) =>
+                    setState(() => deliveryMethod = method),
+                onAddressSelected: (address) =>
+                    setState(() => this.address = address),
+              ),
                   const SizedBox(height: 16),
                   Text(
                       Translations.getText(

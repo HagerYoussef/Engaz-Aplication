@@ -7,7 +7,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../auth/forgetPassword/view/otp_screen.dart';
 import '../auth/login/viewmodel/login_viewmodel.dart';
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 
 class ChangePhoneScreen extends StatelessWidget {
   const ChangePhoneScreen({super.key});

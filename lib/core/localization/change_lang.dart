@@ -265,8 +265,6 @@ class Translations {
       "notess": "Notes",
       "send_req": "Send Request",
 
-
-
       "orderdetail":"Order details",
       "ordernumber":"order number ",
       "ordercal":"Order date ",
@@ -390,15 +388,13 @@ class Translations {
       "tranthereq": "طلب ترجمه",
       "newreq": "طلب ترجمه جديد",
       "langneed": "الرجاء اختيار اللغه المراد ترجمتها",
-      "edjat": "اضغط لاختيار اللغه",
+      "edjat": "اللغة المراد ترجمتها",
       "addressway": "طريقه التوصيل",
-      "attach": "المرفقات المراد ترجمتها",
+      "attach": "اللغات المراد الترجمه اليها",
       "attach2": "الرجاء ارفاق المرفقات المراد ترجتها",
       "chooose": "اختر",
       "notess": "الملاحظات",
       "send_req": "ارسال الطلب",
-
-
       "orderdetail":"تفاصيل الطلب",
       "ordernumber":"رقم الطلب ",
       "ordercal":"تاريخ الطلب ",

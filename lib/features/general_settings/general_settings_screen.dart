@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import '../delete_account/delete_account_screen.dart';
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 
 class GeneralSettingsScreen extends StatefulWidget {
   const GeneralSettingsScreen({super.key});

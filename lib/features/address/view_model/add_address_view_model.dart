@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
@@ -75,7 +74,7 @@ class AddAddressViewModel extends ChangeNotifier {
         await prefs.setString('address_id', responseBody['data']['id']);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("تمت الإضافة بنجاح ✅")),
+          SnackBar(content: Text("تمت الإضافة بنجاح ")),
         );
       }
 
@@ -83,12 +82,12 @@ class AddAddressViewModel extends ChangeNotifier {
         print('token${_getToken()}')
         ;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("فشل في الإضافة ❌")),
+          SnackBar(content: Text("فشل في الإضافة ")),
         );
       }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("حدث خطأ أثناء الإضافة ❌")),
+        SnackBar(content: Text("حدث خطأ أثناء الإضافة ")),
       );
     } finally {
       isLoading = false;
@@ -110,7 +109,7 @@ class AddAddressViewModel extends ChangeNotifier {
 
     if (addressId == null || token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("العنوان أو التوكن غير موجود ❌")),
+        SnackBar(content: Text("العنوان أو التوكن غير موجود ")),
       );
       isLoading = false;
       notifyListeners();
@@ -140,11 +139,11 @@ class AddAddressViewModel extends ChangeNotifier {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("تم التعديل بنجاح ✅")),
+          SnackBar(content: Text("تم التعديل بنجاح ")),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("فشل في التعديل ❌")),
+          SnackBar(content: Text("فشل في التعديل ")),
         );
         print('Response status: ${response.statusCode}');
         print('Response body: ${response.body}');
@@ -152,7 +151,7 @@ class AddAddressViewModel extends ChangeNotifier {
     } catch (error) {
       print('Error during update: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("حدث خطأ أثناء التعديل ❌")),
+        SnackBar(content: Text("حدث خطأ أثناء التعديل ")),
       );
     } finally {
       isLoading = false;
@@ -170,7 +169,7 @@ class AddAddressViewModel extends ChangeNotifier {
 
     if (addressId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("لم يتم العثور على العنوان ❌")),
+        SnackBar(content: Text("لم يتم العثور على العنوان ")),
       );
       isLoading = false;
       notifyListeners();
@@ -197,16 +196,16 @@ class AddAddressViewModel extends ChangeNotifier {
         locationController.clear();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("تم حذف العنوان بنجاح ✅")),
+          SnackBar(content: Text("تم حذف العنوان بنجاح ")),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("فشل في حذف العنوان ❌")),
+          SnackBar(content: Text("فشل في حذف العنوان ")),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("حدث خطأ أثناء الحذف ❌")),
+        SnackBar(content: Text("حدث خطأ أثناء الحذف ")),
       );
     } finally {
       isLoading = false;

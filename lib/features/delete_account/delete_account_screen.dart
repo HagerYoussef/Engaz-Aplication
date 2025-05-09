@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 
 class DeleteAccountScreen extends StatefulWidget {
   const DeleteAccountScreen({super.key});
@@ -21,7 +21,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   }
 
   Future<void> deleteUser(String userId) async {
-    final url = Uri.parse('http://localhost:3000/api/user/$userId/delete');
+    final url = Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/user/$userId/delete');
     try {
       final response = await http.delete(url);
       if (response.statusCode == 200) {
@@ -39,6 +39,12 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         SnackBar(content: Text('خطأ في الاتصال: $e')),
       );
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserId().then((id) => debugPrint("User ID = $id"));
   }
 
   @override

@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 class OrderDetailsPage extends StatelessWidget {
   final String orderNumber;
 

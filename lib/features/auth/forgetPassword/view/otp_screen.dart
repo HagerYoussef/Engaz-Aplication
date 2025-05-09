@@ -76,7 +76,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'IBM_Plex_Sans_Arabic'),
                             ),
-                            const SizedBox(height: 16),
+                            /*const SizedBox(height: 16),
                             Text(
                               widget.contactInfo,
                               style: const TextStyle(
@@ -85,6 +85,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'IBM_Plex_Sans_Arabic'),
                             ),
+                             */
                             const SizedBox(height: 16),
                             OtpFields(otpValues: viewModel.otpValues),
                             const SizedBox(height: 16),

@@ -12,9 +12,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/localization/change_lang.dart';
 import 'features/address/view_model/add_address_view_model.dart';
 import 'features/auth/forgetPassword/viewmodel/otp_viewmodel.dart';
-import 'features/localization/change_lang.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -158,6 +158,7 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
   String? address;
   String? notes;
   List<XFile> uploadedFiles = [];
+  bool showDeliveryError = false;
 
   final List<String> allLanguages = ['Arabic', 'English', 'French', 'Dutch'];
   Future<String?> _getToken() async {
@@ -171,9 +172,7 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
         Uri.parse(
             'https://wckb4f4m-3000.euw.devtunnels.ms/api/order/translation'));
     request.headers.addAll({
-
-     // 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YWJkMWIzNi0xZGQxLTQ2MDktYTE2NC1kZTg5YmM1YWYwMWQiLCJ1c2VybmFtZSI6IkJhc3NlbCBTYWxsYW0iLCJlbWFpbCI6ImJhc3NlbGEuc2FsYW1AZ21haWwuY29tIiwidmVyZmllZCI6dHJ1ZSwiaWF0IjoxNzQ0OTA0ODYxfQ.VqWDf8dTsutW3qCrALQkI-U_7uZvGzH2Cqs-6v99H5k',
-     "Authorization": "Bearer ${await _getToken()}",
+      "Authorization": "Bearer ${await _getToken()}",
       'Connection': 'keep-alive',
     });
     request.fields['fileLanguge'] = fileLanguage ?? '';
@@ -181,12 +180,6 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
     request.fields['notes'] = notes ?? '';
     request.fields['Address'] = address ?? '';
     request.fields['translationLanguges'] = jsonEncode(translationLanguages);
-    // request.fields['translationLanguges'] = ["English","Dutch",] ?? '';
-    //request.fields.addAll({'translationLanguges':["English",""]});
-    // for (var lang in translationLanguages) {
-    //   request.fields.addAll({'translationLanguges': lang});
-    // }
-
     for (var file in uploadedFiles) {
       if (file.path != null) {
         request.files
@@ -197,7 +190,6 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
     try {
       final response = await request.send();
       final result = await response.stream.bytesToString();
-
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -206,6 +198,7 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
               : '❌ Error: $result'),
         ),
       );
+
     } catch (e) {
       showDialog(
         context: context,
@@ -216,7 +209,6 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
 
   void _showLanguageDialog() async {
     final List<String> tempSelected = List.from(translationLanguages);
-
     await showDialog(
       context: context,
       builder: (context) {
@@ -273,7 +265,6 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
           child: Scaffold(
             backgroundColor: const Color(0xffF8F8F8),
             appBar: AppBar(
-              leading: const Icon(Icons.arrow_back_ios),
               title:  Text(Translations.getText(
                 'tranthereq',
                 context.read<LocalizationProvider>().locale.languageCode,
@@ -402,7 +393,6 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
                                 ),
                               ),
                               value: null,
-                             // hint: Text("اضغط لاختيار اللغة"),
                               items: [],
 
                               onChanged: null,
@@ -414,7 +404,6 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
                         ),
 
                         SizedBox(height: 5),
-                        // ElevatedButton(onPressed: _showLanguageDialog, child: Text("Select Languages")),
                         Wrap(
                           spacing: 6.0,
                           children: translationLanguages
@@ -460,12 +449,11 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
                             ),
                           ],
                         ),
-                        if (deliveryMethod == null)
+                        if (showDeliveryError)
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             child: Text(
-                              'Required',
+                              '⚠️ يرجى اختيار طريقة التوصيل',
                               style: TextStyle(color: Colors.red, fontSize: 12),
                             ),
                           ),
@@ -473,9 +461,36 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
                     ),
                     if (deliveryMethod == 'Home')
                       TextFormField(
-                        decoration: InputDecoration(labelText: 'Address'),
                         onChanged: (value) => address = value,
+                        decoration: InputDecoration(
+                          labelText: Translations.getText(
+                            'address',
+                            context.read<LocalizationProvider>().locale.languageCode,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey.shade200,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.blue, width: 2),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.red, width: 2),
+                          ),
+                        ),
                       ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     TextFormField(
                       maxLines: 3,
                       onChanged: (value) => notes = value,
@@ -510,7 +525,7 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
                           context.read<LocalizationProvider>().locale.languageCode,
                         ),
                         style: TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.start,
+                        textAlign: TextAlign.end,
                       ),
                     ),
 
@@ -532,7 +547,7 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
                                   'attach2',
                                   context.read<LocalizationProvider>().locale.languageCode,
                                 ),
-                                textAlign: TextAlign.right,
+                                textAlign: TextAlign.left,
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
@@ -566,26 +581,31 @@ class _TranslationOrderFormState extends State<TranslationOrderForm> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          bool isValid = _formKey.currentState!.validate();
-                          if (!isValid ||
-                              translationLanguages.isEmpty ||
-                              uploadedFiles.isEmpty) {
-                            if (translationLanguages.isEmpty) {
+                          final isValid = _formKey.currentState!.validate();
+                          FocusScope.of(context).unfocus();
+
+                          bool hasDelivery = deliveryMethod != null;
+                          bool hasLanguages = translationLanguages.isNotEmpty;
+                          bool hasFiles = uploadedFiles.isNotEmpty;
+
+                          setState(() {
+                            showDeliveryError = !hasDelivery;
+                          });
+
+                          if (!isValid || !hasDelivery || !hasLanguages || !hasFiles) {
+                            if (!hasLanguages) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Please select at least one translation language.')),
+                                SnackBar(content: Text('⚠️ اختر لغة واحدة على الأقل')),
                               );
                             }
-                            if (uploadedFiles.isEmpty) {
+                            if (!hasFiles) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Please upload at least one document.')),
+                                SnackBar(content: Text('⚠️ قم بإرفاق ملف واحد على الأقل')),
                               );
                             }
                             return;
                           }
+
                           submitOrder();
                         },
                         child: Text(Translations.getText(

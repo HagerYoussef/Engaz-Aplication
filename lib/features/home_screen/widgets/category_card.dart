@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 
 class CategoryCard extends StatelessWidget {
   final String title;

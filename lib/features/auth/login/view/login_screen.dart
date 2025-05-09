@@ -51,24 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  void _showLocalNotification(String title, String body) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails('login_channel', 'Login Notifications',
-        importance: Importance.max,
-        priority: Priority.high,
-        showWhen: false);
-
-    const NotificationDetails platformChannelSpecifics =
-    NotificationDetails(android: androidPlatformChannelSpecifics);
-
-    await flutterLocalNotificationsPlugin.show(
-      0, // ID
-      title,
-      body,
-      platformChannelSpecifics,
-    );
-  }
-
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
@@ -129,10 +111,102 @@ class _LoginScreenState extends State<LoginScreen> {
     return userCredential;
   }
 
+  Future<void> checkIfUserIsVerified(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      print("❌ JWT token missing");
+      return;
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('https://wckb4f4m-3000.euw.devtunnels.ms/api/google/isverify'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final res = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => HomePage()),
+        );
+      } else if (response.statusCode == 400) {
+        showPhoneDialog(context);
+      } else {
+        print("⚠️ Unexpected response: ${res['error'] ?? 'Unknown error'}");
+      }
+    } catch (e) {
+      print("❌ Error checking verification: $e");
+    }
+  }
+
+  void showPhoneDialog(BuildContext context) {
+    final TextEditingController phoneController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("أدخل رقم الهاتف"),
+          content: TextField(
+            controller: phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              hintText: "مثال: 01012345678",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("إلغاء"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final phone = phoneController.text.trim();
+                final prefs = await SharedPreferences.getInstance();
+                final token = prefs.getString('token');
+
+                if (phone.isNotEmpty && token != null) {
+                  final response = await http.post(
+                    Uri.parse('https://your-api.com/api/google/verifyphone'),
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Bearer $token',
+                    },
+                    body: jsonEncode({'phone': phone}),
+                  );
+
+                  if (response.statusCode == 200) {
+                    Navigator.pop(context); // اغلق البوب اب
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => HomePage()),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("فشل في حفظ الرقم")),
+                    );
+                  }
+                }
+              },
+              child: const Text("تأكيد"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: LayoutBuilder(

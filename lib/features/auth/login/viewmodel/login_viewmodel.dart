@@ -31,10 +31,21 @@ class LoginViewModel extends ChangeNotifier {
     if (result['success']) {
       loginState = LoginState.success;
 
-
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('userId', result['userId']);
-     print( 'gvdsfgh'+result['userId']);
+
+      // ✅ اطبع كل البيانات المستلمة
+      print('📦 login result: $result');
+
+      // ✅ استخرج userId بطريقة آمنة
+      final extractedId = result['userId'];
+
+      if (extractedId != null && extractedId is String) {
+        prefs.setString('userId', extractedId);
+        print('✅ userId saved: $extractedId');
+      } else {
+        print('❌ userId is missing or invalid: $extractedId');
+      }
+
       prefs.setString('message', result['message']);
     } else {
       loginState = LoginState.failure;

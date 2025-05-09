@@ -5,11 +5,14 @@ import 'package:geolocator/geolocator.dart';
 class DeliveryOptions extends StatefulWidget {
   final Function(String?)? onDeliveryMethodSelected;
   final Function(String?)? onAddressSelected;
+  final String? selectedMethod;
 
-  DeliveryOptions({
+  const DeliveryOptions({
+    Key? key,
     required this.onDeliveryMethodSelected,
+    required this.selectedMethod,
     required this.onAddressSelected,
-  });
+  }) : super(key: key);
 
   @override
   _DeliveryOptionsState createState() => _DeliveryOptionsState();
@@ -17,9 +20,8 @@ class DeliveryOptions extends StatefulWidget {
 
 class _DeliveryOptionsState extends State<DeliveryOptions> {
   String? deliveryMethod;
-  String? selectedOption;
-  Position? _currentPosition;
   String? selectedAddress;
+  Position? _currentPosition;
 
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -55,18 +57,18 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
         desiredAccuracy: LocationAccuracy.best,
       );
 
-      List<Placemark> placemarks =
-      await placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
-      String address =
-          "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
+      String address = "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
 
       setState(() {
         _currentPosition = position;
         selectedAddress = address;
       });
 
-      // استدعاء الدالة عند تحديد العنوان
       widget.onAddressSelected?.call(selectedAddress);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,31 +84,27 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
       children: [
         Row(
           children: [
-            Radio(
+            Radio<String>(
               value: 'Office',
-              groupValue: deliveryMethod,
+              groupValue: widget.selectedMethod,
               activeColor: const Color(0xff409EDC),
               onChanged: (value) {
                 setState(() {
                   deliveryMethod = value;
-                  selectedOption = null;
-                  _currentPosition = null;
                   selectedAddress = null;
                 });
-                // استدعاء الدالة عند اختيار وسيلة التوصيل
                 widget.onDeliveryMethodSelected?.call(deliveryMethod);
+                widget.onAddressSelected?.call(null);
               },
             ),
             const Text('Office'),
-            Radio(
+            Radio<String>(
               value: 'Home',
               groupValue: deliveryMethod,
               activeColor: const Color(0xff409EDC),
               onChanged: (value) {
                 setState(() {
                   deliveryMethod = value;
-                  selectedOption = null;
-                  _currentPosition = null;
                   selectedAddress = null;
                 });
                 widget.onDeliveryMethodSelected?.call(deliveryMethod);
@@ -116,75 +114,33 @@ class _DeliveryOptionsState extends State<DeliveryOptions> {
             const Text('Home'),
           ],
         ),
-        const SizedBox(height: 8),
-        if (deliveryMethod == "توصيل") ...[
-          _buildAddressOption("المنزل"),
-          _buildAddressOption("العمل"),
-        ],
         const SizedBox(height: 10),
-      ],
-    );
-  }
-
-  Widget _buildAddressOption(String optionTitle) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: RadioListTile<String>(
-        activeColor: const Color(0xff409EDC),
-        contentPadding: EdgeInsets.zero,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              optionTitle,
-              style: const TextStyle(
-                color: Color(0xff409EDC),
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if ((selectedOption == optionTitle && selectedAddress != null) ||
-                (selectedAddress != null && selectedOption == null))
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "الموقع :",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        selectedAddress ?? '',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
+        if (deliveryMethod == 'Home')
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: TextFormField(
+              onChanged: (value) {
+                setState(() => selectedAddress = value);
+                widget.onAddressSelected?.call(value);
+              },
+              initialValue: selectedAddress,
+              decoration: InputDecoration(
+                labelText: "أدخل العنوان يدويًا",
+                filled: true,
+                fillColor: Colors.grey.shade200,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xff409EDC), width: 2),
                 ),
               ),
-          ],
-        ),
-        value: optionTitle,
-        groupValue: selectedOption,
-        onChanged: (value) {
-          setState(() {
-            selectedOption = value;
-          });
-        },
-      ),
+            ),
+          ),
+      ],
     );
   }
 }

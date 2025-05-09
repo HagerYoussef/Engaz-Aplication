@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 import '../viewmodel/home_viewmodel.dart';
-import 'home_content.dart';
 
 class HomePage extends StatelessWidget {
   @override

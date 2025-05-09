@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../contact_us/contactus_screen.dart';
 import '../edit_profile/edit_profile_screen.dart';
 import '../general_settings/general_settings_screen.dart';
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 import '../logout/logout_screen.dart';
 import '../privacy_policy/privacy_policy_screen.dart';
 import '../saved_order/view/saved_order.dart';

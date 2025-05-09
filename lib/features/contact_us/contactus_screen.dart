@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 
 class ContactUsScreen extends StatelessWidget {
   const ContactUsScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 import '../viewmodel/login_viewmodel.dart';
 
 class LoginTextField extends StatefulWidget {
@@ -16,6 +16,8 @@ class _LoginTextFieldState extends State<LoginTextField> {
   @override
   void initState() {
     super.initState();
+    final locale = context.read<LocalizationProvider>().locale;
+    debugPrint("✅ Current locale: ${locale.languageCode}");
     final viewModel = Provider.of<LoginViewModel>(context, listen: false);
     _controller = TextEditingController(text: viewModel.userInput);
     _controller.addListener(() {
@@ -31,72 +33,58 @@ class _LoginTextFieldState extends State<LoginTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<LoginViewModel>();
+    final langCode = context.watch<LocalizationProvider>().locale.languageCode;
+    final isPhone = viewModel.isPhoneSelected;
+
     return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Consumer<LoginViewModel>(
-        builder: (context, viewModel, _) {
-          return Theme(
-              data: Theme.of(context).copyWith(
-                textSelectionTheme: const TextSelectionThemeData(
-                  cursorColor: Color.fromRGBO(64, 157, 220, 1), // لون المؤشر
-                  selectionColor:
-                      Color.fromRGBO(64, 157, 220, 1), // لون التحديد
-                  selectionHandleColor: Color.fromRGBO(
-                      64, 157, 220, 1), // لون "اليد" أو مقبض التحديد
-                ),
-              ),
-              child: TextFormField(
-                key: ValueKey(viewModel.isPhoneSelected),
-                textInputAction: TextInputAction.next,
-                controller: _controller,
-                cursorColor: Color.fromRGBO(64, 157, 220, 1),
-                autofillHints: viewModel.isPhoneSelected
-                    ? const [AutofillHints.telephoneNumber]
-                    : const [AutofillHints.email],
-                keyboardType: viewModel.isPhoneSelected
-                    ? TextInputType.phone
-                    : TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return viewModel.isPhoneSelected
-                        ? 'يرجى إدخال رقم الجوال'
-                        : 'يرجى إدخال البريد الإلكتروني';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  hintText: viewModel.isPhoneSelected
-                      ?  Translations.getText(
-                    'enter2',
-                    context
-                        .read<LocalizationProvider>()
-                        .locale
-                        .languageCode,
-                  )
-                    : Translations.getText(
-                    'enter3',
-                    context
-                        .read<LocalizationProvider>()
-                        .locale
-                        .languageCode,
-                  ),
-                  hintStyle: const TextStyle(
-                    color: Color(0xffB3B3B3),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    fontFamily: 'IBM_Plex_Sans_Arabic',
-                  ),
-                  filled: true,
-                  fillColor: const Color(0xffFAFAFA),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                ),
-              ));
-        },
+      textDirection: langCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          textSelectionTheme: const TextSelectionThemeData(
+            cursorColor: Color(0xFF409DDC),
+            selectionColor: Color(0xFF409DDC),
+            selectionHandleColor: Color(0xFF409DDC),
+          ),
+        ),
+        child: TextFormField(
+          key: ValueKey(isPhone),
+          controller: _controller,
+          textInputAction: TextInputAction.next,
+          cursorColor: const Color(0xFF409DDC),
+          keyboardType:
+          isPhone ? TextInputType.phone : TextInputType.emailAddress,
+          autofillHints: [
+            isPhone ? AutofillHints.telephoneNumber : AutofillHints.email
+          ],
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return isPhone
+                  ? Translations.getText('enter2', langCode)
+                  : Translations.getText('enter3', langCode);
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+            hintText: isPhone
+                ? Translations.getText('enter2', langCode)
+                : Translations.getText('enter3', langCode),
+            hintStyle: const TextStyle(
+              color: Color(0xFFB3B3B3),
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              fontFamily: 'IBM_Plex_Sans_Arabic',
+            ),
+            filled: true,
+            fillColor: const Color(0xFFFAFAFA),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          ),
+        ),
       ),
     );
   }

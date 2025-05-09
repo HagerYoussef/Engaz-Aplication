@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 import '../order_details/order_details_page.dart';
 
 class OrdersScreen extends StatefulWidget {

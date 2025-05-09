@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:geocoding/geocoding.dart';
 
-import '../../localization/change_lang.dart';
+import '../../../core/localization/change_lang.dart';
 import '../view_model/add_address_view_model.dart';
 
 

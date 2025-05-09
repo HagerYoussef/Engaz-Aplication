@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../auth/forgetPassword/view/otp_screen.dart';
 import '../auth/login/viewmodel/login_viewmodel.dart';
-import '../localization/change_lang.dart';
+import '../../../../core/localization/change_lang.dart';
 
 class ChangeEmailScreen extends StatelessWidget {
   const ChangeEmailScreen({super.key});
